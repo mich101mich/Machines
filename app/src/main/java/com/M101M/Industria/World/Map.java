@@ -10,8 +10,8 @@ public class Map
 	{
 		if (pos == null)
 			return null;
-		return chunks.find(new Predicate<Chunk>() {
-				public boolean apply(Chunk e)
+		return chunks.find(new Arr.Condition<Chunk>() {
+				public boolean test(Chunk e)
 				{ return e.inChunk(pos); }
 			});
 	}

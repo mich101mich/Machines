@@ -1,6 +1,5 @@
 package com.M101M.Industria.Utils;
 import java.util.*;
-import com.android.internal.util.Predicate;
 
 public class Arr<E extends Object> implements Iterable
 {
@@ -13,6 +12,13 @@ public class Arr<E extends Object> implements Iterable
 	{
 		max = expectedCapacity;
 		content = (E[])new Object[max];
+	}
+	public void clear()
+	{
+		if (count == 0)
+			return;
+		content = (E[])new Object[max];
+		count = slot = 0;
 	}
 	public void reserve(int amount)
 	{
@@ -40,11 +46,12 @@ public class Arr<E extends Object> implements Iterable
 			content[i] = e; count++; slot = i + 1;
 			return;
 		}
+		throw new RuntimeException("something happened");
 	}
-	public E find(Predicate<E> p)
+	public E find(Condition<E> p)
 	{
 		for (E e : this)
-			if (p.apply(e))
+			if (p.test(e))
 				return e;
 		return null;
 	}
@@ -63,13 +70,13 @@ public class Arr<E extends Object> implements Iterable
 		}
 		return false;
 	}
-	public E remove(Predicate<E> p)
+	public E remove(Condition<E> p)
 	{
 		Iterator<E> it = iterator();
 		while (it.hasNext())
 		{
 			E e = it.next();
-			if (p.apply(e))
+			if (p.test(e))
 			{
 				it.remove();
 				return e;
@@ -77,13 +84,13 @@ public class Arr<E extends Object> implements Iterable
 		}
 		return null;
 	}
-	public void removeAll(Predicate<E> p)
+	public void removeAll(Condition<E> p)
 	{
 		Iterator<E> it = iterator();
 		while (it.hasNext())
 		{
 			E e = it.next();
-			if (p.apply(e))
+			if (p.test(e))
 				it.remove();
 		}
 	}
@@ -116,4 +123,6 @@ public class Arr<E extends Object> implements Iterable
 			}
 		};
 	}
+	public static interface Condition<E extends Object>
+	{boolean test(E e);}
 }

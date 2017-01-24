@@ -18,7 +18,6 @@ public class OpenGLView extends GLSurfaceView
 		setEGLContextClientVersion(3);
 		rend = new MyRenderer();
 		setRenderer(rend);
-
 	}
 
 	boolean dialogOpen = false;
@@ -56,29 +55,54 @@ public class OpenGLView extends GLSurfaceView
 		display(message);
 	}
 
-	Vec touchPoints[];
+	MotionEvent event;
+	Arr<TouchEvent> touch = new Arr<TouchEvent>(20);
 	@Override public boolean onTouchEvent (MotionEvent e)
 	{
-		int count = e.getPointerCount() - (e.getAction() == e.ACTION_UP ? 1 : 0);
-		if (count == 0)
-		{
-			touchPoints = null;
-			return true;
-		}
-		touchPoints = new Vec[count];
-		for (int i=0; i < count; i++)
-			touchPoints[i] = new Vec(
-				e.getX(i) / (float)getWidth() * 2 - 1,
-				e.getY(i) / (float)getHeight() * (-2) + 1,
-				0);
+		if (e.getAction() == event.ACTION_UP || e.getAction() == e.ACTION_CANCEL)
+			event = null;
+		else
+			event = e;
 		return true;
+	}
+	void handleTouch()
+	{
+		if (event == null)
+		{
+			touch.clear();
+			return;
+		}
+		MotionEvent e = event;
+		for (TouchEvent t : touch)
+			t.handled = true;
+		for (int i=0; i < e.getPointerCount(); i++)
+		{
+			if (e.getAction() == e.ACTION_POINTER_UP
+				&& e.getActionIndex() == i)
+				continue;
+			final int id = e.getPointerId(i);
+			if (touch.find(new Arr.Condition<TouchEvent>(){public boolean test(TouchEvent e){
+					return e.id == id; }})
+					== null)
+				touch.add(new TouchEvent(e, i));
+		}
+		Iterator<TouchEvent> it = touch.iterator();
+		while (it.hasNext())
+		{
+			TouchEvent t = it.next();
+			if (t.handled && !t.refresh(e))
+				it.remove();
+			else
+				t.pos = new Vec2(t.pos.x / (GLM.width/2.0f) - 1, 1 - t.pos.y / (GLM.height/2.0f));
+		}
 	}
 
 	final float walkSpeed = 0.3f, lookSpeed = 2.5f;
 	long lastUpdate = System.currentTimeMillis(), delta = 0;
 	void PhysicUpdate ()
 	{
-		Vec[] touch = touchPoints;
+		handleTouch();
+		
 		long dt = System.currentTimeMillis() - lastUpdate;
 		lastUpdate += dt;
 		delta += dt;
@@ -90,22 +114,22 @@ public class OpenGLView extends GLSurfaceView
 		}
 
 		Vec dp = new Vec(), dr = new Vec();
-		if (touch == null)
-			return;
 		boolean chg = false;
-		for (Vec t : touch)
+		for (TouchEvent t : touch)
 		{
-			if (Math.abs(t.x) > 0.7f) // right
+			if (t.handled)
+				continue;
+			if (Math.abs(t.pos.x) > 0.7f) // right
 			{
-				if (Math.abs(t.y) < 0.3) dr.y += -Math.signum(t.x);
-				else										 dp.x += Math.signum(t.x);
-				chg = true;
+				if (Math.abs(t.pos.y) < 0.3) dr.y += -Math.signum(t.pos.x);
+				else										 dp.x += Math.signum(t.pos.x);
+				t.handled = chg = true;
 			}
-			if (Math.abs(t.y) > 0.7f) // front
+			if (Math.abs(t.pos.y) > 0.7f) // front
 			{
-				if (Math.abs(t.x) < 0.3) dr.x += Math.signum(t.y);
-				else										 dp.z += -Math.signum(t.y);
-				chg = true;
+				if (Math.abs(t.pos.x) < 0.3) dr.x += Math.signum(t.pos.y);
+				else										 dp.z += -Math.signum(t.pos.y);
+				t.handled = chg = true;
 			}
 		}
 		if (chg)
@@ -114,10 +138,14 @@ public class OpenGLView extends GLSurfaceView
 			Game.player.rot.add(dr.scale(lookSpeed));
 			Game.player.rot.x = Math.min(70, Math.max(-70, Game.player.rot.x));
 			Game.player.rot.y = (Game.player.rot.y + 360) % 360;
-			return;
 		}
 
-		float[] tpos = new float[]{touch[0].x * GLM.w2,touch[0].y * GLM.h2,-3,0}, out = new float[4];
+		TouchEvent t = touch.find(new Arr.Condition<TouchEvent>() {public boolean test(TouchEvent e) {
+				return !e.handled;
+			}});
+		if (t == null)
+			return;
+		float[] tpos = new float[]{t.pos.x * GLM.w2,t.pos.y * GLM.h2,-3,0}, out = new float[4];
 		Matrix.setIdentityM(GLM.transMat, 0);
 		Matrix.rotateM(GLM.transMat, 0, Game.player.rot.y, 0, 1, 0);
 		Matrix.rotateM(GLM.transMat, 0, Game.player.rot.x, 1, 0, 0);
