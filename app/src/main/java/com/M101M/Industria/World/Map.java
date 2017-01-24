@@ -1,6 +1,7 @@
 package com.M101M.Industria.World;
 
 import com.M101M.Industria.Utils.*;
+import com.android.internal.util.Predicate;
 
 public class Map
 {
@@ -9,8 +10,8 @@ public class Map
 	{
 		if (pos == null)
 			return null;
-		return chunks.find(new Arr.Condition<Chunk>() {
-				@Override public boolean test(Chunk e)
+		return chunks.find(new Predicate<Chunk>() {
+				public boolean apply(Chunk e)
 				{ return e.inChunk(pos); }
 			});
 	}
@@ -33,11 +34,9 @@ public class Map
 		Chunk chunk = getChunk(pos);
 		return (chunk == null ? null : chunk.getBlock(pos));
 	}
-	public void draw() throws Exception
+	public void draw()
 	{
-		chunks.forEach(new Arr.Action<Chunk>() {
-				@Override public void run(Chunk e) throws Exception
-				{ e.draw(); }
-			});
+		for (Chunk c : chunks)
+			c.draw();
 	}
 }

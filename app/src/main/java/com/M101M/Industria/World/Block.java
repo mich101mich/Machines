@@ -23,7 +23,7 @@ public class Block
 		this.type = type;
 	}
 
-	public static void globalInit() throws Exception
+	public static void globalInit()
 	{
 		program = GLM.createProgram(
 			GLM.loadShader(GLES20.GL_VERTEX_SHADER,
@@ -98,7 +98,7 @@ public class Block
 		initialised = true;
 	}
 
-	public static void startDrawing() throws Exception
+	public static void startDrawing()
 	{
 		gl.glUseProgram(program);
 		gl.glBindBuffer(GLES30.GL_ELEMENT_ARRAY_BUFFER, handle[INDEX]);
@@ -113,7 +113,7 @@ public class Block
 		GLM.drawing = GLM.BLOCK;
 	}
 
-	public void draw() throws Exception
+	public void draw()
 	{
 		float dist = Vec.minus(pos, Game.player.pos).length();
 		if (dist > GLM.renderDistance)

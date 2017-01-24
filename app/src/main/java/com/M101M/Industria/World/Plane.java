@@ -14,7 +14,7 @@ public class Plane
 		pos = position;
 	}
 
-	public static void globalInit () throws Exception
+	public static void globalInit ()
 	{
 		program = GLM.createProgram(
 			GLM.loadShader(GLES20.GL_VERTEX_SHADER,
@@ -51,7 +51,7 @@ public class Plane
 		gl.glBufferData(GLES20.GL_ELEMENT_ARRAY_BUFFER, 4, Utils.toByteBuffer(new byte[]{0,1,2,3}), GLES20.GL_STATIC_DRAW);
 	}
 
-	public static void startDrawing () throws Exception
+	public static void startDrawing ()
 	{
 		gl.glUseProgram(program);
 		gl.glBindBuffer(GLES20.GL_ELEMENT_ARRAY_BUFFER, indexHandle);
@@ -60,7 +60,7 @@ public class Plane
 		gl.glUniformMatrix4fv(matHandle, 1, false, GLM.mvpMat, 0);
 		GLM.drawing = GLM.PLANE;
 	}
-	public void draw () throws Exception
+	public void draw ()
 	{
 		if (GLM.drawing != GLM.PLANE)
 			startDrawing();

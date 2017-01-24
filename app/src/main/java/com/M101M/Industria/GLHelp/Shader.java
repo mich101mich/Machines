@@ -6,7 +6,7 @@ import java.nio.*;
 
 public class Shader
 {
-	public static void init() throws Exception
+	public static void init()
 	{
 		int[] handle = GLM.genBuffers(2);
 		

@@ -13,7 +13,7 @@ public class Game
 	public static UI ui;
 	public static Arr<Veci> updates;
 
-	public static void init() throws Exception
+	public static void init()
 	{
 		time = 0;
 		Shader.init();
@@ -36,7 +36,7 @@ public class Game
 			for (int j=0; j<10; j++)
 				map.set(new Block(-i,0,-j, i));
 	}
-	public static void stop() throws Exception
+	public static void stop()
 	{
 		//GlHelp.stop();
 		map = null;
@@ -48,17 +48,11 @@ public class Game
 	{
 		Arr<Veci> old = updates;
 		updates = new Arr<Veci>(old.max);
-		try
+		for (Veci v : old)
 		{
-			old.forEach(new Arr.Action<Veci>(){
-					@Override public void run(Veci e)
-					{
-						Block b = map.getBlock(e);
-						if (b != null)
-							b.update();
-					}
-				});
+			Block b = map.getBlock(v);
+			if (b != null)
+				b.update();
 		}
-		catch (Exception e) {}
 	}
 }

@@ -8,13 +8,14 @@ public class UI
 	{
 		elements = new Arr<UIElement>();
 	}
-	public void draw() throws Exception
+	public void draw()
+	{
+		for (UIElement e : elements)
+			e.draw();
+	}
+	public boolean onTouch(TouchEvent e)
 	{
 		
-		elements.forEach(new Arr.Action<UIElement>(){
-				@Override public void run(UIElement e) throws Exception
-				{
-					e.draw();
-				}});
+		return false;
 	}
 }

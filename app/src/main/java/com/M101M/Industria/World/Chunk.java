@@ -51,14 +51,11 @@ public class Chunk
 			return null;
 		return chunk[p.x-pos.x][p.y][p.z-pos.z];
 	}
-	void draw() throws Exception
+	void draw()
 	{
 		if (new Vec(Game.player.pos.x - pos.x - 4, 0,Game.player.pos.z - pos.z - 4).length() > GLM.renderDistance + 6)
 			return;
-
-		blocks.forEach(new Arr.Action<Block>() {
-				@Override public void run(Block e) throws Exception
-				{ e.draw(); }
-			});
+		for (Block b : blocks)
+			b.draw();
 	}
 }

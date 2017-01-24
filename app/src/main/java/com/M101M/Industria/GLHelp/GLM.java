@@ -22,7 +22,7 @@ public class GLM
 		Matrix.translateM(transMat,0,delta.x,delta.y,delta.z);
 		Utils.multiply(mvpMat,0, transMat,0);
 	}
-	public static int loadShader(int type, String... lines) throws Exception
+	public static int loadShader(int type, String... lines)
 	{
 		String code = Utils.join(lines, "\n");
 		int shader = gl.glCreateShader(type);
@@ -30,7 +30,7 @@ public class GLM
 		gl.glCompileShader(shader);
 		return shader;
 	}
-	public static int createProgram(int... shaders) throws Exception
+	public static int createProgram(int... shaders)
 	{
 		int program = gl.glCreateProgram();
 		for (int shader : shaders)
@@ -38,7 +38,7 @@ public class GLM
 		gl.glLinkProgram(program);
 		return program;
 	}
-	public static void setup() throws Exception
+	public static void setup()
 	{
 		buffers = new int[64]; bufferCount = 0;
 		gl.glClearColor(0.6f, 0.6f, 1.0f, 1.0f);
@@ -49,7 +49,7 @@ public class GLM
 		gl.glBlendFunc(GLES20.GL_ONE, GLES20.GL_ONE_MINUS_SRC_ALPHA);
 		Game.init();
 	}
-	public static void changeSurface(int w, int h) throws Exception
+	public static void changeSurface(int w, int h)
 	{
 		width = w; height = h; w2 = (float)w/h;
 		gl.glViewport(0,0,width,height);
@@ -58,13 +58,13 @@ public class GLM
 		Matrix.setLookAtM(lookMat,0, 0,0,0, 0,0,-1, 0,1,0);
 		Matrix.multiplyMM(viewMat,0, projMat,0, lookMat,0);
 	}
-	public static void startDrawing() throws Exception
+	public static void startDrawing()
 	{
 		gl.glClear(GLES20.GL_COLOR_BUFFER_BIT | GLES20.GL_DEPTH_BUFFER_BIT);
 		System.arraycopy(viewMat,0, mvpMat,0, 16);
 		drawing = -1;
 	}
-	public static int[] genBuffers(int count) throws Exception
+	public static int[] genBuffers(int count)
 	{
 		int[] ret = new int[count];
 		gl.glGenBuffers(count, ret,0);
@@ -72,7 +72,7 @@ public class GLM
 		bufferCount += count;
 		return ret;
 	}
-	public static void stop() throws Exception
+	public static void stop()
 	{
 		if (bufferCount > 0)
 			gl.glDeleteBuffers(bufferCount, buffers,0);
