@@ -1,28 +1,134 @@
 package com.M101M.Industria.GLHelp;
 
 import android.opengl.*;
+import com.M101M.Industria.*;
 import com.M101M.Industria.Utils.*;
-import java.nio.*;
 
 public class Shader
 {
 	public static void init()
 	{
 		int[] handle = GLM.genBuffers(2);
-		
+
 		matHandle = handle[0];
-		float[] mat = new float[materials.length*4];
-		for (int i=0; i<materials.length; i++)
-			System.arraycopy(new float[]{(materials[i]>>16)/256f, ((materials[i]>>8)&255)/256f, (materials[i]&255)/256f,1},0, mat,i*4, 4);
+		float[] mat = new float[materials.length * 4];
+		for (int i=0; i < materials.length; i++)
+			System.arraycopy(Utils.hexToArray(materials[i]), 0, mat, i * 4, 4);
 		gl.glBindBuffer(GLES20.GL_ARRAY_BUFFER, matHandle);
-		gl.glBufferData(GLES30.GL_ARRAY_BUFFER, mat.length*4, Utils.toFloatBuffer(mat), GLES30.GL_STATIC_DRAW);
-		
+		gl.glBufferData(GLES30.GL_ARRAY_BUFFER, mat.length * 4, Utils.toFloatBuffer(mat), GLES30.GL_STATIC_DRAW);
+
 		letterHandle = handle[1];
 		gl.glBindBuffer(GLES20.GL_ARRAY_BUFFER, letterHandle);
-		gl.glBufferData(GLES30.GL_ARRAY_BUFFER, letters.length*2, Utils.toShortBuffer(letters), GLES30.GL_STATIC_DRAW);
+		gl.glBufferData(GLES30.GL_ARRAY_BUFFER, letters.length * 2, Utils.toShortBuffer(letters), GLES30.GL_STATIC_DRAW);
+		
+		gl.glBindBuffer(GLES20.GL_ARRAY_BUFFER, 0);
+		
+		programs = new int[10];
+		
+		programs[BLOCK] = GLM.createProgram(
+			GLM.loadShader(GLES20.GL_VERTEX_SHADER, blockVert),
+			GLM.loadShader(GLES20.GL_FRAGMENT_SHADER, BlockFrag)
+		);
+		
+		programs[PLANE] = GLM.createProgram(
+			GLM.loadShader(GLES20.GL_VERTEX_SHADER, planeVert),
+			GLM.loadShader(GLES20.GL_FRAGMENT_SHADER, planeFrag)
+		);
+		
+		programs[RECTANGLE] = GLM.createProgram(
+			GLM.loadShader(GLES20.GL_VERTEX_SHADER, RectangleVert),
+			GLM.loadShader(GLES20.GL_FRAGMENT_SHADER, RectangleFrag)
+		);
 	}
+	public static void use(int type)
+	{
+		program = programs[type];
+		gl.glUseProgram(program);
+	}
+	public static int getUniform(String name)
+	{
+		return gl.glGetUniformLocation(program, name);
+	}
+	public static int getAttribute(String name)
+	{
+		int ret = gl.glGetAttribLocation(program, name);
+		gl.glEnableVertexAttribArray(ret);
+		return ret;
+	}
+	
+	public static final int BLOCK=0, PLANE=1, RECTANGLE=2, TEXT=3;
+	private static int programs[], program;
+	private static final String[] blockVert = {
+		"uniform mat4 mvpMat;",
+		"uniform vec4 position, selected;",
+		"uniform int type;",
+		"attribute vec4 vertex;",
+		"attribute vec4 material;",
+		"varying vec4 pos;",
+		"varying float sel;",
+		"varying vec4 color;",
+		"void main() {",
+		"		gl_Position = mvpMat * (position + vertex);",
+		"		color = material; pos = vertex; sel = (selected.x == position.x && selected.y == position.y && selected.z == position.z ? 1.0 : 0.0);",
+		"}"
+	}, BlockFrag = {
+		"uniform int tick,type;",
+		"varying vec4 pos;",
+		"varying float sel;",
+		"varying vec4 color;",
+		"void set(float f, vec4 col) {",
+		"		gl_FragColor = f*col + (1.0-f)*vec4(vec3(1,1,1)-col.rgb,1);",
+		"}",
+		"void main() {",
+		"		float f = 1.0;",
+		"		if (sel == 1.0)",
+		"				f = sin(6.2832*float(tick-tick/" + (1300 / Game.tps) + "*" + (1300 / Game.tps) + ")/" + (1300 / Game.tps) + ".0)/2.0+0.5;",
+		"		set(f, color);",
+		"		if (type == " + Type.cable + " || type == " + Type.cablePow + ") {",
+		"       float d = 0.15, s = -1.0, l = 0.0;",
+		"				if (abs(pos.x-0.5) < d) { s = pos.x; l = (fract(pos.y) == 0.0 ? pos.z : pos.y); }",
+		"				if (abs(pos.y-0.5) < d) { s = pos.y; l = (fract(pos.z) == 0.0 ? pos.x : pos.z); }",
+		"				if (abs(pos.z-0.5) < d) { s = pos.z; l = (fract(pos.x) == 0.0 ? pos.y : pos.x); }",
+		"				if (s == -1.0 || (abs(s-0.5) < 0.027 && abs(l-0.5) >= d)) {",
+		"						set(f, vec4(0,0,0,1));",
+		"						return;",
+		"				}",
+		"				if (type != " + Type.cablePow + " || abs(l-0.5) < d)",
+		"						return;",
+		"				s -= 0.5-d;",
+		"				float c = 0.28*sin(6.28319*((s<d ? l : 1.0-l) + float(tick)/" + (600 / Game.tps) + ".0));",
+		"				set(f, color + vec4(c,c,c,0));",
+		"		}",
+		"}"
+	}, planeVert = {
+		"uniform mat4 mvpMat; uniform vec4 position;",
+		"attribute vec4 vertex;",
+		"varying vec4 pos;",
+		"void main() {",
+		"		gl_Position = mvpMat * (position + vertex);",
+		"		pos = vertex + position;",
+		"}"
+	}, planeFrag = {
+		"varying vec4 pos;",
+		"void main() {",
+		"		vec4 f = fract(pos);",
+		"		if (f.x < 0.02 || f.x > 0.98 || f.z < 0.02 || f.z > 0.98)",
+		"				gl_FragColor = vec4(0,0,0,1);",
+		"		else gl_FragColor = vec4(0.5,0.5,0.5,1);",
+		"}"
+	}, RectangleVert = {
+		"uniform mat4 mvpMat;",
+		"attribute vec4 vertex;",
+		"void main() {",
+		"		gl_Position = mvpMat * vertex;",
+		"}"
+	}, RectangleFrag = {
+		"void main() {",
+		"		gl_FragColor = vec4(1,1,1,1);",
+		"}"
+	};
 
-	public static int matHandle, matStride=32*4;
+	public static int matHandle, matStride=32 * 4;
 	public static final int[] materials = {
 		0x888888,0x888888,0x00ff00,0x888888,0x00ff00,0x888888,0x00ff00,0x00ff00,
 		0x888888,0x888888,0x888888,0x888888,0x888888,0x888888,0x888888,0x888888,

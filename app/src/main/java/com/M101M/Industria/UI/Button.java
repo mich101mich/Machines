@@ -2,18 +2,21 @@ package com.M101M.Industria.UI;
 
 import com.M101M.Industria.Utils.*;
 
-public class Button
+public class Button extends Text
 {
-	public String text;
-	public Vec2 pos;
-	Button(String text, Vec2 pos)
+	public Button(Vec2 pos, String text)
 	{
-		this.text = text;
-		this.pos = pos;
+		super(pos, text);
 	}
-	
-	public static void startDrawing()
+
+	@Override
+	public void draw()
 	{
 		
+	}
+	@Override
+	public boolean handleTouch(TouchEvent e)
+	{
+		return false;
 	}
 }

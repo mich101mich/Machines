@@ -95,6 +95,9 @@ public class OpenGLView extends GLSurfaceView
 			else
 				t.pos = new Vec2(t.pos.x / (GLM.width/2.0f) - 1, 1 - t.pos.y / (GLM.height/2.0f));
 		}
+		
+		for (TouchEvent t : touch)
+			Game.ui.onTouch(t);
 	}
 
 	final float walkSpeed = 0.3f, lookSpeed = 2.5f;
@@ -186,14 +189,22 @@ public class OpenGLView extends GLSurfaceView
 
 				GLM.startDrawing();
 
-				Game.ui.draw();
-
 				GLM.rotate(Vec.negative(Game.player.rot));
 				GLM.translate(Vec.negative(Game.player.pos));
 
+				gl.glEnable(GLES20.GL_DEPTH_TEST);
+				
+				Block.startDrawing();
 				Game.map.draw();
+				
+				Plane.startDrawing();
 				Game.ground.draw();
-
+				
+				gl.glDisable(GLES20.GL_DEPTH_TEST);
+				gl.glBindBuffer(GLES20.GL_ARRAY_BUFFER, 0);
+				gl.glBindBuffer(GLES20.GL_ELEMENT_ARRAY_BUFFER, 0);
+				
+				Game.ui.draw();
 			}
 			catch (Exception e)
 			{ showError(e, "onDrawFrame"); }

@@ -6,9 +6,7 @@ import com.M101M.Industria.Utils.*;
 
 public class GLM
 {
-	public static int drawing;
-	public static final int BLOCK = 1, PLANE = 2, BUTTON = 3, TEXT = 4;
-	public static final float[] mvpMat = new float[16], transMat = new float[16], viewMat = new float[16];
+	public static final float[] mvpMat = new float[16], transMat = new float[16], viewMat = new float[16], uiMat = new float[16];
 	public static int buffers[] = new int[64], bufferCount = 0, renderDistance = 30, width, height;
 	public static float w2, h2 = 1.0f;
 	public static void rotate(Vec angle)
@@ -57,12 +55,16 @@ public class GLM
 		Matrix.frustumM(projMat,0, -w2,w2,-h2,h2,3,renderDistance);
 		Matrix.setLookAtM(lookMat,0, 0,0,0, 0,0,-1, 0,1,0);
 		Matrix.multiplyMM(viewMat,0, projMat,0, lookMat,0);
+		
+		lookMat = new float[16]; projMat = new float[16];
+		Matrix.frustumM(projMat,0, -w2,w2,-h2,h2, 3,7);
+		Matrix.setLookAtM(lookMat,0, 0,0,3, 0,0,0, 0,1,0);
+		Matrix.multiplyMM(uiMat,0, projMat,0, lookMat,0);
 	}
 	public static void startDrawing()
 	{
 		gl.glClear(GLES20.GL_COLOR_BUFFER_BIT | GLES20.GL_DEPTH_BUFFER_BIT);
 		System.arraycopy(viewMat,0, mvpMat,0, 16);
-		drawing = -1;
 	}
 	public static int[] genBuffers(int count)
 	{

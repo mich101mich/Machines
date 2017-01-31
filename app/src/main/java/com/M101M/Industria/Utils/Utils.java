@@ -35,7 +35,7 @@ public class Utils
 	}
 	public static ShortBuffer toShortBuffer(short[] arr)
 	{
-		ByteBuffer bb = ByteBuffer.allocateDirect(arr.length * 4);
+		ByteBuffer bb = ByteBuffer.allocateDirect(arr.length * 2);
 		bb.order(ByteOrder.nativeOrder());
 		ShortBuffer ret = bb.asShortBuffer();
 		ret.put(arr);
@@ -56,10 +56,9 @@ public class Utils
 			ret[i] = src[indices[i]];
 		return ret;
 	}
-	public static float[] hexToArray(long color)
+	public static float[] hexToArray(int color)
 	{
-		float alpha = ((color >> 24)&255) / 255.0f;
-		return new float[]{ ((color >> 16)&255)/255.0f, ((color >> 8)&255)/255.0f, (color&255)/255.0f, (alpha!=0 ? alpha : 1.0f)};
+		return new float[]{ ((color >> 16)&255)/255.0f, ((color >> 8)&255)/255.0f, (color&255)/255.0f, 1.0f - ((color>>24)&255)/255.0f};
 	}
 	public static float[] rotate(float x,float y, float angle)
 	{

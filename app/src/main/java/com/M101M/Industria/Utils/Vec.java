@@ -12,6 +12,8 @@ public class Vec
 	{ x=v.x;y=v.y;z=v.z; }
 	public Vec(Veci v)
 	{ x=v.x;y=v.y;z=v.z; }
+	public Vec(Vec2 v)
+	{ x=v.x;y=v.y;z=0; }
 	public float[] toArray()
 	{ return new float[]{x,y,z,0};}
 	public Vec add(Vec o)
