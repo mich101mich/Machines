@@ -7,8 +7,9 @@ import com.M101M.Industria.Utils.*;
 public class GLM
 {
 	public static final float[] mvpMat = new float[16], transMat = new float[16], viewMat = new float[16], uiMat = new float[16];
-	public static int buffers[] = new int[64], bufferCount = 0, renderDistance = 30, width, height;
-	public static float w2, h2 = 1.0f;
+	public static int buffers[] = new int[64], bufferCount = 0, renderDistance = 30;
+	public static Vec2 screen;
+	public static float ratio;
 	public static void rotate(Vec angle)
 	{
 		Utils.setRotation(transMat,0, angle);
@@ -45,25 +46,27 @@ public class GLM
 		gl.glCullFace(GLES20.GL_BACK);
 		gl.glEnable(GLES20.GL_BLEND);
 		gl.glBlendFunc(GLES20.GL_ONE, GLES20.GL_ONE_MINUS_SRC_ALPHA);
-		Game.init();
 	}
 	public static void changeSurface(int w, int h)
 	{
-		width = w; height = h; w2 = (float)w/h;
-		gl.glViewport(0,0,width,height);
+		screen = new Vec2(w, h); ratio = ((float)w/h);
+		gl.glViewport(0,0,w,h);
 		float[] lookMat = new float[16], projMat = new float[16];
-		Matrix.frustumM(projMat,0, -w2,w2,-h2,h2,3,renderDistance);
+		Matrix.frustumM(projMat,0, -ratio,ratio, -1,1, 3,renderDistance);
 		Matrix.setLookAtM(lookMat,0, 0,0,0, 0,0,-1, 0,1,0);
 		Matrix.multiplyMM(viewMat,0, projMat,0, lookMat,0);
 		
 		lookMat = new float[16]; projMat = new float[16];
-		Matrix.frustumM(projMat,0, -w2,w2,-h2,h2, 3,7);
+		Matrix.frustumM(projMat,0, -ratio,ratio, 1,-1, 3,7);
 		Matrix.setLookAtM(lookMat,0, 0,0,3, 0,0,0, 0,1,0);
 		Matrix.multiplyMM(uiMat,0, projMat,0, lookMat,0);
+		
+		Game.init();
 	}
 	public static void startDrawing()
 	{
 		gl.glClear(GLES20.GL_COLOR_BUFFER_BIT | GLES20.GL_DEPTH_BUFFER_BIT);
+		gl.glEnable(GLES20.GL_DEPTH_TEST);
 		System.arraycopy(viewMat,0, mvpMat,0, 16);
 	}
 	public static int[] genBuffers(int count)

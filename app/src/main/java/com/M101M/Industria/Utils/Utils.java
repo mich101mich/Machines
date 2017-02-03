@@ -60,6 +60,10 @@ public class Utils
 	{
 		return new float[]{ ((color >> 16)&255)/255.0f, ((color >> 8)&255)/255.0f, (color&255)/255.0f, 1.0f - ((color>>24)&255)/255.0f};
 	}
+	public static int ArrayToHex(float[] color)
+	{
+		return ((int)((1-color[3])*255) << 24) + ((int)(color[0]*255) << 16) + ((int)(color[1]*255) << 8) + (int)(color[2]*255);
+	}
 	public static float[] rotate(float x,float y, float angle)
 	{
 		angle = (float)Math.toRadians(angle);

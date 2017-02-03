@@ -12,7 +12,6 @@ public class gl
 		GLES20.glDisable(flag);
 		debug("glDisable", flag);
 	}
-
 	public static void glVertexAttribPointer(int handle, int size, int dataType, boolean normalized, int stride, Buffer buffer)
 	{
 		GLES20.glVertexAttribPointer(handle, size, dataType, normalized, stride, buffer);
@@ -91,6 +90,11 @@ public class gl
 	{
 		GLES20.glUniform1i(handle, data);
 		debug("glUniform1i", handle, data);
+	}
+	public static void glUniform1f(int handle, float data)
+	{
+		GLES20.glUniform1f(handle, data);
+		debug("glUniform1f", handle, data);
 	}
 	public static void glDrawElements(int type, int count, int indexType, int offset)
 	{

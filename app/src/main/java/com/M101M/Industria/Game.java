@@ -24,6 +24,7 @@ public class Game
 		Block.globalInit();
 		Plane.globalInit();
 		Rectangle.globalInit();
+		Text.globalInit();
 
 		ground = new Plane(new Vec(0,-0.01f,0));
 
@@ -36,8 +37,6 @@ public class Game
 		for (int i=0; i<5; i++)
 			for (int j=0; j<10; j++)
 				map.set(new Block(-i,0,-j, i));
-				
-		ui.add(new Rectangle(0,0,10,10,0xffffff));
 	}
 	public static void stop()
 	{

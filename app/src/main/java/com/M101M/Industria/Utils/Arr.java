@@ -124,5 +124,5 @@ public class Arr<E extends Object> implements Iterable
 		};
 	}
 	public static interface Condition<E extends Object>
-	{boolean test(E e);}
+	{public boolean test(E e);}
 }

@@ -4,32 +4,56 @@ import android.view.*;
 
 public class TouchEvent
 {
-	public Type type;
-	public int id;
-	public Vec2 pos;
+	private int type;
+	private int id;
+	private Vec2 pos;
 	public boolean handled;
-	public TouchEvent(MotionEvent e, int index)
+	public TouchEvent(MotionEvent e, int index, Vec2 screenSize, float screenRatio)
 	{
 		id = e.getPointerId(index);
-		refresh(e);
-		type = Type.DOWN;
+		refresh(e, screenSize, screenRatio);
 	}
-	public boolean refresh(MotionEvent e)
+	public boolean refresh(MotionEvent e, Vec2 screenSize, float screenRatio)
 	{
+		handled = false;
+		if (e == null)
+		{
+			if (type == UP)
+				return false;
+			type = HOLD;
+			return true;
+		}
 		int i = e.findPointerIndex(id);
 		if (i == e.INVALID_POINTER_ID
-			|| (e.getAction() == e.ACTION_POINTER_UP
-				&& e.getActionIndex() == i))
+			|| (e.getActionMasked() == e.ACTION_POINTER_UP && e.getActionIndex() == i)
+			|| e.getAction() == e.ACTION_UP)
 		{
-			return false;
+			if (type == UP)
+				return false;
+			type = UP;
+			return true;
 		}
-		pos = new Vec2(e.getX(i), e.getY(i));
-		type = Type.HOLD;
-		handled = false;
+		Vec2 next = new Vec2((e.getX(i)/screenSize.x *2 -1) * screenRatio, e.getY(i)/screenSize.y *2 -1);
+		if (pos == null)
+			type = DOWN;
+		else if (!pos.equals(next))
+			type = MOVE;
+		else
+			type = HOLD;
+		pos = next;
 		return true;
 	}
-	public enum Type {
-		DOWN,
-		HOLD
-	}
+	public int id()
+	{ return id; }
+	public int type()
+	{ return type; }
+	public float x()
+	{ return pos.x; }
+	public float y()
+	{ return pos.y; }
+	public static final int
+		DOWN = 0,
+		HOLD = 1,
+		MOVE = 2,
+		UP = 3;
 }

@@ -20,23 +20,26 @@ public class Rectangle extends UIElement
 	{
 		Shader.use(Shader.RECTANGLE);
 		matHandle = Shader.getUniform("mvpMat");
-		//colHandle = Shader.getUniform("color");
+		colHandle = Shader.getUniform("color");
 		vertexHandle = Shader.getAttribute("vertex");
 	}
 	@Override
 	public void draw()
 	{
+		if (Utils.hexToArray(color)[3] < 0.01)
+			return;
+		
 		Shader.use(Shader.RECTANGLE);
 		
 		gl.glUniformMatrix4fv(matHandle, 1, false, GLM.uiMat, 0);
-		//gl.glUniform4fv(colHandle, 1, Utils.hexToArray(color),0);
-		gl.glVertexAttribPointer(vertexHandle, 3, GLES20.GL_FLOAT, false, 12, Utils.toFloatBuffer(new float[]{
-					-0.5f,  0.5f, 0.0f,   // top left
-					-0.5f, -0.5f, 0.0f,   // bottom left
-					0.5f, -0.5f, 0.0f,   // bottom right
-					0.5f,  0.5f, 0.0f }));
+		gl.glUniform4fv(colHandle, 1, Utils.hexToArray(color),0);
+		gl.glVertexAttribPointer(vertexHandle, 2, GLES20.GL_FLOAT, false, 8, Utils.toFloatBuffer(new float[]{
+					pos.x, pos.y,
+					pos.x, pos.y + size.y,
+					pos.x + size.x, pos.y,
+					pos.x + size.x,  pos.y + size.y }));
 		
-		gl.glDrawElements(GLES20.GL_TRIANGLES, 6, GLES20.GL_UNSIGNED_BYTE, Utils.toByteBuffer(new byte[]{ 0, 1, 2, 0, 2, 3 }));
+		gl.glDrawElements(GLES20.GL_TRIANGLE_STRIP, 4, GLES20.GL_UNSIGNED_BYTE, Utils.toByteBuffer(new byte[]{ 0, 1, 2, 3 }));
 	}
 	@Override
 	public boolean handleTouch(TouchEvent e)

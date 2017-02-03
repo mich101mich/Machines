@@ -4,6 +4,7 @@ import android.content.*;
 import android.opengl.*;
 import android.view.*;
 import com.M101M.Industria.GLHelp.*;
+import com.M101M.Industria.UI.*;
 import com.M101M.Industria.Utils.*;
 import com.M101M.Industria.World.*;
 import java.util.*;
@@ -11,8 +12,8 @@ import java.util.*;
 public class OpenGLView extends GLSurfaceView
 {
 	MyRenderer rend;
-	
-	public OpenGLView (Context context)
+
+	public OpenGLView(Context context)
 	{
 		super(context);
 		setEGLContextClientVersion(3);
@@ -21,27 +22,27 @@ public class OpenGLView extends GLSurfaceView
 	}
 
 	boolean dialogOpen = false;
-	void display (final String message)
+	void display(final String message)
 	{
 		if (dialogOpen)
 			return;
 		dialogOpen = true;
 		final MainActivity a = (MainActivity)getContext();
 		a.runOnUiThread(new Runnable() {
-				@Override public void run ()
+				@Override public void run()
 				{
 					new android.app.AlertDialog.Builder(a)
 						.setTitle("debug")
 						.setMessage(message)
 						.setNegativeButton("ok", new android.content.DialogInterface.OnClickListener(){
-							@Override public void onClick (android.content.DialogInterface p1, int p2)
+							@Override public void onClick(android.content.DialogInterface p1, int p2)
 							{ dialogOpen = false; }
 						})
 						.create().show();
 				}
 			});
 	}
-	void showError (Exception e, String method)
+	void showError(Exception e, String method)
 	{
 		String[] className = e.getClass().getName().split("[$.]");
 		String message = className[className.length - 1] + "\n" + e.getMessage() + "\n";
@@ -57,9 +58,9 @@ public class OpenGLView extends GLSurfaceView
 
 	MotionEvent event;
 	Arr<TouchEvent> touch = new Arr<TouchEvent>(20);
-	@Override public boolean onTouchEvent (MotionEvent e)
+	@Override public boolean onTouchEvent(MotionEvent e)
 	{
-		if (e.getAction() == event.ACTION_UP || e.getAction() == e.ACTION_CANCEL)
+		if (e.getAction() == e.ACTION_CANCEL)
 			event = null;
 		else
 			event = e;
@@ -69,43 +70,48 @@ public class OpenGLView extends GLSurfaceView
 	{
 		if (event == null)
 		{
-			touch.clear();
+			Iterator<TouchEvent> it = touch.iterator();
+			while (it.hasNext())
+			{
+				if (!it.next().refresh(null, GLM.screen, GLM.ratio))
+					it.remove();
+			}
 			return;
 		}
 		MotionEvent e = event;
+		event = null;
 		for (TouchEvent t : touch)
 			t.handled = true;
 		for (int i=0; i < e.getPointerCount(); i++)
 		{
-			if (e.getAction() == e.ACTION_POINTER_UP
-				&& e.getActionIndex() == i)
+			if (e.getAction() == e.ACTION_UP ||
+				(e.getActionMasked() == e.ACTION_POINTER_UP
+				&& e.getActionIndex() == i))
 				continue;
 			final int id = e.getPointerId(i);
-			if (touch.find(new Arr.Condition<TouchEvent>(){public boolean test(TouchEvent e){
-					return e.id == id; }})
+			if (touch.find(new Arr.Condition<TouchEvent>(){public boolean test(TouchEvent e) {
+						return e.id() == id; }})
 					== null)
-				touch.add(new TouchEvent(e, i));
+				touch.add(new TouchEvent(e, i, GLM.screen, GLM.ratio));
 		}
 		Iterator<TouchEvent> it = touch.iterator();
 		while (it.hasNext())
 		{
 			TouchEvent t = it.next();
-			if (t.handled && !t.refresh(e))
+			if (t.handled && !t.refresh(e, GLM.screen, GLM.ratio))
 				it.remove();
-			else
-				t.pos = new Vec2(t.pos.x / (GLM.width/2.0f) - 1, 1 - t.pos.y / (GLM.height/2.0f));
 		}
-		
-		for (TouchEvent t : touch)
-			Game.ui.onTouch(t);
 	}
 
 	final float walkSpeed = 0.3f, lookSpeed = 2.5f;
 	long lastUpdate = System.currentTimeMillis(), delta = 0;
-	void PhysicUpdate ()
+	void PhysicUpdate()
 	{
 		handleTouch();
 		
+		for (TouchEvent t : touch)
+			Game.ui.onTouch(t);
+
 		long dt = System.currentTimeMillis() - lastUpdate;
 		lastUpdate += dt;
 		delta += dt;
@@ -122,16 +128,16 @@ public class OpenGLView extends GLSurfaceView
 		{
 			if (t.handled)
 				continue;
-			if (Math.abs(t.pos.x) > 0.7f) // right
+			if (Math.abs(t.x()) > 0.7*GLM.ratio)
 			{
-				if (Math.abs(t.pos.y) < 0.3) dr.y += -Math.signum(t.pos.x);
-				else										 dp.x += Math.signum(t.pos.x);
+				if (Math.abs(t.y()) < 0.3) dr.y += -Math.signum(t.x());
+				else										 		 dp.x += Math.signum(t.x());
 				t.handled = chg = true;
 			}
-			if (Math.abs(t.pos.y) > 0.7f) // front
+			if (Math.abs(t.y()) > 0.7)
 			{
-				if (Math.abs(t.pos.x) < 0.3) dr.x += Math.signum(t.pos.y);
-				else										 dp.z += -Math.signum(t.pos.y);
+				if (Math.abs(t.x()) < 0.3*GLM.ratio) dr.x += -Math.signum(t.y());
+				else										 							 dp.z += Math.signum(t.y());
 				t.handled = chg = true;
 			}
 		}
@@ -143,12 +149,13 @@ public class OpenGLView extends GLSurfaceView
 			Game.player.rot.y = (Game.player.rot.y + 360) % 360;
 		}
 
-		TouchEvent t = touch.find(new Arr.Condition<TouchEvent>() {public boolean test(TouchEvent e) {
+		TouchEvent t = touch.find(new Arr.Condition<TouchEvent>() {public
+			boolean test(TouchEvent e) {
 				return !e.handled;
 			}});
 		if (t == null)
 			return;
-		float[] tpos = new float[]{t.pos.x * GLM.w2,t.pos.y * GLM.h2,-3,0}, out = new float[4];
+		float[] tpos = new float[]{t.x(),-t.y(),-3,0}, out = new float[4];
 		Matrix.setIdentityM(GLM.transMat, 0);
 		Matrix.rotateM(GLM.transMat, 0, Game.player.rot.y, 0, 1, 0);
 		Matrix.rotateM(GLM.transMat, 0, Game.player.rot.x, 1, 0, 0);
@@ -170,7 +177,7 @@ public class OpenGLView extends GLSurfaceView
 	public class MyRenderer implements Renderer
 	{
 		@Override
-		public void onSurfaceCreated (javax.microedition.khronos.opengles.GL10 unused, javax.microedition.khronos.egl.EGLConfig config)
+		public void onSurfaceCreated(javax.microedition.khronos.opengles.GL10 unused, javax.microedition.khronos.egl.EGLConfig config)
 		{
 			try
 			{ GLM.setup(); }
@@ -179,12 +186,13 @@ public class OpenGLView extends GLSurfaceView
 		}
 
 		@Override
-		public void onDrawFrame (javax.microedition.khronos.opengles.GL10 unused)
+		public void onDrawFrame(javax.microedition.khronos.opengles.GL10 unused)
 		{
 			try
 			{
 				Game.time = (Game.time + 1) % 10000;
 
+				Game.ui.update();
 				PhysicUpdate();
 
 				GLM.startDrawing();
@@ -192,18 +200,13 @@ public class OpenGLView extends GLSurfaceView
 				GLM.rotate(Vec.negative(Game.player.rot));
 				GLM.translate(Vec.negative(Game.player.pos));
 
-				gl.glEnable(GLES20.GL_DEPTH_TEST);
-				
 				Block.startDrawing();
 				Game.map.draw();
-				
+
 				Plane.startDrawing();
 				Game.ground.draw();
-				
-				gl.glDisable(GLES20.GL_DEPTH_TEST);
-				gl.glBindBuffer(GLES20.GL_ARRAY_BUFFER, 0);
-				gl.glBindBuffer(GLES20.GL_ELEMENT_ARRAY_BUFFER, 0);
-				
+
+				UI.startDrawing();
 				Game.ui.draw();
 			}
 			catch (Exception e)
@@ -211,7 +214,7 @@ public class OpenGLView extends GLSurfaceView
 		}
 
 		@Override
-		public void onSurfaceChanged (javax.microedition.khronos.opengles.GL10 unused, int width, int height)
+		public void onSurfaceChanged(javax.microedition.khronos.opengles.GL10 unused, int width, int height)
 		{
 			try
 			{ GLM.changeSurface(width, height); }

@@ -44,6 +44,20 @@ public class Vec
 	{ x=(x+m)%m; y=(y+m)%m; z=(z+m)%m; return this;}
 	public Vec unit()
 	{ return this.scale(1 / this.length()); }
+	@Override
+	public boolean equals(Object obj)
+	{
+		if (obj == null)
+			return false;
+		if (obj instanceof Vec)
+			return x == ((Vec)obj).x && y == ((Vec)obj).y && z == ((Vec)obj).z;
+		if (obj instanceof Veci)
+			return x == ((Veci)obj).x && y == ((Veci)obj).y && z == ((Veci)obj).z;
+		if (obj instanceof Vec2)
+			return x == ((Vec2)obj).x && y == ((Vec2)obj).y;
+		return false;
+	}
+	
 	public static Vec minus(Vec l,Vec r)
 	{ return negative(r).add(l); }
 	public static Vec plus(Vec l,Vec r)
