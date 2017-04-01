@@ -11,6 +11,8 @@ public class Veci
 	{ x=v.x;y=v.y;z=v.z; }
 	public Veci(Vec v)
 	{ x=(int)Math.floor(v.x);y=(int)Math.floor(v.y);z=(int)Math.floor(v.z); }
+	public Veci(Vec2 v)
+	{ x=(int)Math.floor(v.x);y=(int)Math.floor(v.y);z=0; }
 	public int[] toArray()
 	{ return new int[]{x,y,z,0};}
 	public Veci add(Veci o)
@@ -40,7 +42,26 @@ public class Veci
 		return d.x*d.x + d.y*d.y + d.z*d.z < distance*distance;
 	}
 	public Veci modulo(int m)
-	{ x=(x+m)%m; y=(y+m)%m; z=(z+m)%m; return this;}
+	{ x = (x + m) % m; y = (y + m) % m; z = (z + m) % m; return this;}
+	@Override
+	public boolean equals(Object obj)
+	{
+		if (obj == null)
+			return false;
+		if (obj instanceof Vec)
+			return x == ((Vec)obj).x && y == ((Vec)obj).y && z == ((Vec)obj).z;
+		if (obj instanceof Veci)
+			return x == ((Veci)obj).x && y == ((Veci)obj).y && z == ((Veci)obj).z;
+		if (obj instanceof Vec2)
+			return x == ((Vec2)obj).x && y == ((Vec2)obj).y;
+		return false;
+	}
+	@Override
+	public int hashCode()
+	{
+		return x*y*z + x + y + z + x*y + y*z + z*x;
+	}
+	
 	public static Veci minus(Veci l,Veci r)
 	{ return new Veci(l.x-r.x, l.y-r.y, l.z-r.z); }
 	public static Veci plus(Veci l,Veci r)

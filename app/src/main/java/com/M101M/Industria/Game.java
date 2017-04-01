@@ -29,14 +29,14 @@ public class Game
 		ground = new Plane(new Vec(0,-0.01f,0));
 
 		for (int i=1; i<10; i++)
-			map.set(new Block(i,0,0, Type.mud));
+			map.set(new Block(i,0,0, Type.mud), false);
 		for (int i=1; i<8; i++)
-			map.set(new Block(0,i,0, Type.grass));
+			map.set(new Block(0,i,0, Type.grass), false);
 		for (int i=1; i<10; i++)
-			map.set(new Block(0,0,i, Type.stone));
+			map.set(new Block(0,0,i, Type.stone), false);
 		for (int i=0; i<5; i++)
 			for (int j=0; j<10; j++)
-				map.set(new Block(-i,0,-j, i));
+				map.set(new Block(-i,0,-j, i), false);
 	}
 	public static void stop()
 	{
@@ -56,5 +56,10 @@ public class Game
 			if (b != null)
 				b.update();
 		}
+	}
+	public static void addUpdates(Veci pos)
+	{
+		for (int i=0; i<=6; i++)
+			updates.add(Veci.move(pos, i));
 	}
 }

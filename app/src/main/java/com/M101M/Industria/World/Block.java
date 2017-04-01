@@ -90,22 +90,25 @@ public class Block
 		if (conducts() && !isSource())
 		{
 			if (!hasPower(source))
+			{
+				setPower(false);
 				source = findSource();
+			}
 			setPower(hasPower(source));
 		}
 	}
 	Block findSource()
 	{
-		Block b;
+		Block b, ret;
 		for (int i=0; i < 6; i++)
 		{
-			b = Game.map.getBlock(pos, i);
+			ret = b = Game.map.getBlock(pos, i);
 			if (b == null || !b.hasPower())
 				continue;
-			while (hasPower(b.source))
+			while (b.source != this && hasPower(b.source))
 				b = b.source;
 			if (b.isSource())
-				return b;
+				return ret;
 		}
 		return null;
 	}
@@ -117,12 +120,7 @@ public class Block
 			type = Type.cable;
 		else
 			return;
-		for (int i=0; i < 6; i++)
-		{
-			Block b = Game.map.getBlock(Veci.move(pos, i));
-			if (b != null && b.conducts() && !b.isSource() && (b.hasPower() != pow))
-				Game.updates.add(b.pos);
-		}
+		Game.addUpdates(pos);
 	}
 	final static int[] conductors = { Type.cable, Type.cablePow, Type.stone };
 	final static int[] powerSources = { Type.stone };
@@ -151,5 +149,12 @@ public class Block
 	static boolean hasPower(Block b)
 	{
 		return b != null && b.hasPower() && b.exists();
+	}
+	@Override
+	public boolean equals(Object obj)
+	{
+		if (obj == null || !(obj instanceof Block))
+			return false;
+		return ((Block)obj).type == type && Veci.equals(((Block)obj).pos, pos);
 	}
 }

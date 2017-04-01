@@ -6,56 +6,72 @@ import com.M101M.Industria.Utils.*;
 
 public class Chunk
 {
-	Veci pos;
-	Arr<Block> blocks = new Arr<Block>(30);
-	Block[][][] chunk = new Block[8][8][8];
-	int needsUpdate = 0;
-	Chunk(Veci position)
+	private Veci pos;
+	private Arr<Block> blocks = new Arr<Block>(30);
+	private Block[][][] chunk = new Block[8][8][8];
+	private int needsUpdate = 0;
+	public Chunk(Veci position)
 	{
-		int x = (position.x >= 0 ? position.x/8 : (position.x+1)/8-1);
-		int z = (position.z >= 0 ? position.z/8 : (position.z+1)/8-1);
-		pos = new Veci(x*8,0,z*8);
+		pos = toChunkVec(position);
 	}
-	boolean inChunk(Veci p)
-	{ return p != null && p.x >= pos.x && p.x < pos.x+8 && p.z >= pos.z && p.z < pos.z+8 && p.y >= 0 && p.y < 8; }
-	void set(Block b)
+	public boolean inChunk(Veci p)
+	{
+		return pos.equals(toChunkVec(p));
+	}
+	public Veci getPos()
+	{
+		return new Veci(pos);
+	}
+	public boolean set(Block b)
 	{
 		if (b == null || !inChunk(b.pos))
-			return;
+			return false;
 		remove(b.pos);
 		if (b.needsUpdate())
 			needsUpdate++;
 		blocks.add(b);
 		set(b.pos, b);
+		return true;
 	}
 	private void set(Veci p, Block val)
 	{ chunk[p.x-pos.x][p.y][p.z-pos.z] = val; }
-	void remove(Block b)
+	public boolean remove(Block b)
 	{
-		if (b == null || getBlock(b.pos) == null)
-			return;
+		if (b == null || getBlock(b.pos) != b)
+			return false;
 		if (b.needsUpdate())
 			needsUpdate--;
 		blocks.remove(b);
 		set(b.pos, null);
+		return true;
 	}
-	Block remove(Veci p)
+	public Block remove(Veci p)
 	{
 		Block ret = getBlock(p);
 		remove(ret);
 		return ret;
 	}
-	Block getBlock(Veci p)
+	public Block getBlock(Veci p)
 	{
 		if (!inChunk(p))
 			return null;
 		return chunk[p.x-pos.x][p.y][p.z-pos.z];
 	}
-	void draw()
+	public void draw()
 	{
 		if (new Vec(Game.player.pos.x - pos.x - 4, 0,Game.player.pos.z - pos.z - 4).length() > GLM.renderDistance + 6)
 			return;
 		for (Block b : blocks)
 			b.draw();
+	}
+	public static Veci toChunkVec(Veci p)
+	{
+		if (p == null || p.y < 0 || p.y >= 8)
+			return null;
+		return new Veci(
+			(p.x >= 0 ? p.x/8 : (p.x+1)/8-1) * 8,
+			0,
+			(p.z >= 0 ? p.z/8 : (p.z+1)/8-1) * 8
+		);
 	}
 }
