@@ -89,9 +89,10 @@ public class OpenGLView extends GLSurfaceView
 				&& e.getActionIndex() == i))
 				continue;
 			final int id = e.getPointerId(i);
-			if (touch.find(new Arr.Condition<TouchEvent>(){public boolean test(TouchEvent e) {
-						return e.id() == id; }})
-					== null)
+			if (touch.find(new Arr.Condition<TouchEvent>(){public boolean test(TouchEvent e)
+						{
+							return e.id() == id; }})
+				== null)
 				touch.add(new TouchEvent(e, i, GLM.screen, GLM.ratio));
 		}
 		Iterator<TouchEvent> it = touch.iterator();
@@ -108,7 +109,7 @@ public class OpenGLView extends GLSurfaceView
 	void PhysicUpdate()
 	{
 		handleTouch();
-		
+
 		for (TouchEvent t : touch)
 			Game.ui.onTouch(t);
 
@@ -128,7 +129,7 @@ public class OpenGLView extends GLSurfaceView
 		{
 			if (t.handled)
 				continue;
-			if (Math.abs(t.x()) > 0.7*GLM.ratio)
+			if (Math.abs(t.x()) > 0.7 * GLM.ratio)
 			{
 				if (Math.abs(t.y()) < 0.3) dr.y += -Math.signum(t.x());
 				else										 		 dp.x += Math.signum(t.x());
@@ -136,7 +137,7 @@ public class OpenGLView extends GLSurfaceView
 			}
 			if (Math.abs(t.y()) > 0.7)
 			{
-				if (Math.abs(t.x()) < 0.3*GLM.ratio) dr.x += -Math.signum(t.y());
+				if (Math.abs(t.x()) < 0.3 * GLM.ratio) dr.x += -Math.signum(t.y());
 				else										 							 dp.z += Math.signum(t.y());
 				t.handled = chg = true;
 			}
@@ -150,9 +151,9 @@ public class OpenGLView extends GLSurfaceView
 		}
 
 		TouchEvent t = touch.find(new Arr.Condition<TouchEvent>() {public
-			boolean test(TouchEvent e) {
-				return !e.handled;
-			}});
+				boolean test(TouchEvent e) {
+					return !e.handled;
+				}});
 		if (t == null)
 			return;
 		float[] tpos = new float[]{t.x(),-t.y(),-3,0}, out = new float[4];
@@ -164,14 +165,28 @@ public class OpenGLView extends GLSurfaceView
 		Veci target = Utils.rayHit(Game.player.pos, dir);
 		if (target == null)
 			Game.player.selected = null;
-		else if (target.y == -1)
-		{
-			Game.map.set(new Block(target.add(0, 1, 0), Type.cable));
-			Game.updates.add(target);
-			//Game.player.selected = new Block(target, Type.mud);
-		}
 		else
-			Game.player.selected = Game.map.getBlock(target);
+		{
+			switch (Game.player.action)
+			{
+			case Player.SELECT:
+				Game.player.selected = Game.map.getBlock(target);
+				break;
+			case Player.PLACE:
+				if (t.type() != t.DOWN)
+					break;
+			case Player.PLACE_DRAG:
+				target = Utils.rayHitEnd(Game.player.pos, dir);
+				Game.map.set(new Block(target, Game.player.placeType));
+				break;
+			case Player.DELETE:
+				if (t.type() != t.DOWN)
+					break;
+			case Player.DELETE_DRAG:
+				Game.map.remove(target);
+				break;
+			}
+		}
 	}
 
 	public class MyRenderer implements Renderer

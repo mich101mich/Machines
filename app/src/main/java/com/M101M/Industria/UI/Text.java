@@ -42,12 +42,14 @@ public class Text extends Rectangle
 		for (String s : lines)
 			if (s.length() > maxWidth)
 				maxWidth = s.length();
-		scale = size.x / (maxWidth * TEXT_WIDTH);
-		size.y = scale * lines.length * TEXT_HEIGHT;
+		scale = size.x / (maxWidth * TEXT_WIDTH + 1);
+		size.y = scale * (lines.length * TEXT_HEIGHT + 1);
 	}
 	@Override
 	public void draw()
 	{
+		if (!visible)
+			return;
 		super.draw();
 		Shader.use(Shader.TEXT);
 		gl.glUniformMatrix4fv(matHandle, 1, false, GLM.uiMat, 0);
@@ -77,10 +79,10 @@ public class Text extends Rectangle
 			
 			GLES20.glUniform1iv(textHandle, 6, Shader.letters, index * 6);
 			gl.glVertexAttribPointer(vertexHandle, 2, GLES20.GL_FLOAT, false, 8, Utils.toFloatBuffer(new float[]{
-						pos.x + lw*x, pos.y + lh*y,
-						pos.x + lw*x, pos.y + lh*(y+1),
-						pos.x + lw*(x+1), pos.y + lh*y,
-						pos.x + lw*(x+1),  pos.y + lh*(y+1) }));
+						pos.x + lw*x, pos.y + lh*y + scale,
+						pos.x + lw*x, pos.y + lh*(y+1) + scale,
+						pos.x + lw*(x+1), pos.y + lh*y + scale,
+						pos.x + lw*(x+1),  pos.y + lh*(y+1) + scale }));
 
 			gl.glDrawElements(GLES20.GL_TRIANGLE_STRIP, 4, GLES20.GL_UNSIGNED_BYTE, Utils.toByteBuffer(new byte[]{ 0, 1, 2, 3 }));
 		}

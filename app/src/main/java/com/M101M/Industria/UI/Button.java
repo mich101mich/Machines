@@ -2,32 +2,38 @@ package com.M101M.Industria.UI;
 
 import com.M101M.Industria.Utils.*;
 
-public class Button extends Text
+public class Button extends Rectangle
 {
-	private OnClickListener listener;
-	public Button(Vec2 pos, float width, String text, int textColor, int background, OnClickListener l)
+	public UIElement content = null;
+	private OnClickListener listener = null;
+	public Button(Vec2 pos, Vec2 size, UIElement content, int background, OnClickListener l)
 	{
-		super(pos, width, text, textColor, background);
+		super(pos, size, background);
+		this.content = content;
 		listener = l;
-	}
-	public Button(Vec2 pos, float width, String text, int textColor, int background)
-	{
-		this(pos, width, text, textColor, background, null);
-	}
-	public Button(Vec2 pos, float width, String text)
-	{
-		this(pos, width, text, 0x0, 0xaaaaaa);
-	}
-	public Button(Vec2 pos, float width, String text, OnClickListener l)
-	{
-		this(pos, width, text, 0x0, 0xaaaaaa, l);
 	}
 	public void setOnClickListener(OnClickListener l)
 	{ listener = l; }
+
+	@Override
+	public void draw()
+	{
+		super.draw();
+		if (content != null)
+		{
+			Vec2 p = content.pos;
+			content.pos = Vec2.add(p, pos);
+			content.draw();
+			content.pos = p;
+		}
+	}
+	
 	@Override
 	public void update()
 	{
 		super.update();
+		if (content != null)
+			content.update();
 		if (touched == 1)
 			touched = 2;
 		else if (touched == 2)
@@ -79,8 +85,11 @@ public class Button extends Text
 		}
 		if (e.id() == touchID && touched != 0)
 		{
-			if (e.type() == e.UP && listener != null && bounds().contains(e.x(), e.y()))
-				listener.onClick(this);
+			if (e.type() == e.UP && bounds().contains(e.x(), e.y()))
+			{
+				if (listener != null)
+					listener.onClick(this);
+			}
 			else
 				touched = 1;
 			return e.handled = true;
@@ -91,4 +100,22 @@ public class Button extends Text
 	{
 		public void onClick(Button b);
 	}
+	
+	public Button(Vec2 pos, Vec2 size, UIElement content, int background)
+	{ this(pos, size, content, background, null); }
+	public Button(Vec2 pos, Vec2 size, UIElement content, OnClickListener l)
+	{ this(pos, size, content, 0xaaaaaa, l); }
+	public Button(Vec2 pos, Vec2 size, int background, OnClickListener l)
+	{ this(pos, size, null, background, l); }
+	public Button(Vec2 pos, UIElement content, int background, OnClickListener l)
+	{ this(pos, content.size, content, background, l); }
+	
+	public Button(Vec2 pos, Vec2 size, UIElement content)
+	{ this(pos, size, content, null); }
+	
+	public Button(Vec2 pos, Vec2 size, String text, int textColor, int background, OnClickListener l)
+	{ this(pos, size, new Text(pos, size.x, text, textColor), background, l); }
+	public Button(Vec2 pos, float width, String text, int textColor)
+	{ this(pos, new Text(pos, width, text).size, new Text(pos, width, text, textColor)); }
+	
 }

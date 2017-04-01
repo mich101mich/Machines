@@ -21,6 +21,12 @@ public class GLM
 		Matrix.translateM(transMat,0,delta.x,delta.y,delta.z);
 		Utils.multiply(mvpMat,0, transMat,0);
 	}
+	public static void scale(Vec factor)
+	{
+		Matrix.setIdentityM(transMat,0);
+		Matrix.scaleM(transMat,0, factor.x, factor.y, factor.z);
+		Utils.multiply(mvpMat,0, transMat,0);
+	}
 	public static int loadShader(int type, String... lines)
 	{
 		String code = Utils.join(lines, "\n");

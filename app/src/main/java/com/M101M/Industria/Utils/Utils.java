@@ -102,6 +102,24 @@ public class Utils
 		}
 		return null;
 	}
+	public static Veci rayHitEnd(Vec start, Vec dir)
+	{
+		Vec p = new Vec(start);
+		dir = Vec.unit(dir).scale(0.1f);
+		Veci block = new Veci(p), prev;
+		for (int count = 0; count < 300; count++)
+		{
+			p.add(dir);
+			if (!Veci.equals(new Veci(p), block))
+			{
+				prev = block;
+				block = new Veci(p);
+				if (block.y < 0 || Game.map.getBlock(block) != null)
+					return prev;
+			}
+		}
+		return null;
+	}
 	public static boolean find(Veci start, int[] targets, int[] walkable)
 	{
 		Veci[] path = new Veci[200], all = new Veci[200];

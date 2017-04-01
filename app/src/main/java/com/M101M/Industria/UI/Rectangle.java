@@ -5,16 +5,12 @@ import com.M101M.Industria.Utils.*;
 
 public class Rectangle extends UIElement
 {
-	static int matHandle, colHandle, vertexHandle;
+	private static int matHandle, colHandle, vertexHandle;
 	int color;
 	public Rectangle(Vec2 pos, Vec2 size, int color)
 	{
 		super(pos, size);
 		this.color = color;
-	}
-	public Rectangle(float x,float y, float width,float height, int color)
-	{
-		this(new Vec2(x,y), new Vec2(width,height), color);
 	}
 	public static void globalInit()
 	{
@@ -26,7 +22,7 @@ public class Rectangle extends UIElement
 	@Override
 	public void draw()
 	{
-		if (Utils.hexToArray(color)[3] < 0.01)
+		if (!visible || Utils.hexToArray(color)[3] < 0.01)
 			return;
 		
 		Shader.use(Shader.RECTANGLE);

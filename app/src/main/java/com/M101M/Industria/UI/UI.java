@@ -1,5 +1,6 @@
 package com.M101M.Industria.UI;
 import android.opengl.*;
+import com.M101M.Industria.*;
 import com.M101M.Industria.GLHelp.*;
 import com.M101M.Industria.Utils.*;
 
@@ -10,41 +11,120 @@ public class UI
 	{
 		elements = new Arr<UIElement>();
 		
-		final Text werbung = new Text(new Vec2(-GLM.ratio, 0.7f), GLM.ratio, "Hier könnte\nIhre Werbung stehen!", 0xff0000, 0xffffff);
-		final Animation annoy = new Animation(-1){
-				Vec2 pos;
-				public void start(UIElement obj)
-				{ pos = new Vec2(obj.pos); }
-				public void step(UIElement obj)
-				{
-					Text t = ((Text)obj);
-					t.color = 0xff << ((int)(Math.random()*3) * 8);
-					t.textColor = 0xff << ((int)(Math.random()*3) * 8);
-					t.pos.x = pos.x + ((float)Math.random()* 0.06f - 0.03f);
-					t.pos.y = pos.y + ((float)Math.random()* 0.06f - 0.03f);
-				}
-				public void stop(UIElement obj)
-				{
-					Text t = ((Text)obj);
-					t.color = 0xffffff;
-					t.textColor = 0x0;
-					t.pos = pos;
-				}
-			};
-		werbung.setAnimation(annoy);
-		elements.add(werbung);
+		final float buttonX = GLM.ratio - 0.4f;
 		
-		elements.add(new Button(new Vec2(-GLM.ratio + 0.1f, -0.9f), GLM.ratio * 2 - 0.2f, "Hello World!", new Button.OnClickListener(){
-			boolean active = true;
-			public void onClick(Button b) {
-				if (active)
-					werbung.setAnimation(null);
-				else
-					werbung.setAnimation(annoy);
-				active = !active;
-			}}));
+		final Container blocks = new Container(
+			new Vec2(-buttonX, -0.8f),
+			new Vec2(2 * buttonX, 0.3f),
+			Container.Align.RIGHT);
 		
-		//elements.add(new BlockDisplay(new Vec2(0,0), 0.5f, 3));
+		final Button expand = new Button(
+			new Vec2(buttonX, -0.8f),
+			new Vec2(0.3f,0.3f),
+			new Text(
+				new Vec2(0, -0.3f/7),
+				0.3f,
+				"<"));
+			
+		final Button place  = new Button(
+			new Vec2(buttonX, -0.2f),
+			new Vec2(0.3f,0.3f),
+			new BlockDisplay(
+				new Vec2(0.01f, 0.01f),
+				0.28f,
+				Game.player.placeType));
+			
+		final Button delete = new Button(
+			new Vec2(buttonX, 0.4f),
+			new Vec2(0.3f,0.3f),
+			new Text(
+				new Vec2(0, -0.3f/7 *2),
+				0.3f,
+				"x",
+				0xff0000));
+				
+		blocks.visible = false;
+		for (int type : Type.placeable)
+		{
+			Button b = new Button(
+				new Vec2(0,0),
+				new Vec2(0.3f,0.3f),
+				new BlockDisplay(new Vec2(), 0.3f, type));
+			b.setOnClickListener(new Button.OnClickListener(){
+					public void onClick(Button b) {
+						((BlockDisplay)place.content).type
+							= Game.player.placeType
+							= ((BlockDisplay)b.content).type;
+						blocks.visible = false;
+					}});
+			blocks.add(b);
+		}
+		
+		delete.setOnClickListener(new Button.OnClickListener(){
+				public void onClick(Button b) {
+					switch (Game.player.action)
+					{
+					case Player.DELETE:
+						Game.player.action = Player.DELETE_DRAG;
+						delete.pos.x = buttonX - 0.1f;
+						break;
+					case Player.DELETE_DRAG:
+						Game.player.action = Player.SELECT;
+						delete.pos.x = buttonX;
+						break;
+					default:
+						Game.player.action = Player.DELETE;
+						place.pos.x = buttonX;
+						delete.pos.x = buttonX - 0.05f;
+					}
+				}});
+		place.setOnClickListener(new Button.OnClickListener(){
+				public void onClick(Button b) {
+					switch (Game.player.action)
+					{
+					case Player.PLACE:
+						Game.player.action = Player.PLACE_DRAG;
+						place.pos.x = buttonX - 0.1f;
+						break;
+					case Player.PLACE_DRAG:
+						Game.player.action = Player.SELECT;
+						place.pos.x = buttonX;
+						break;
+					default:
+						Game.player.action = Player.PLACE;
+						delete.pos.x = buttonX;
+						place.pos.x = buttonX - 0.05f;
+					}
+					
+					
+					
+					
+					blocks.add(new Button(
+						new Vec2(0,0),
+						new Vec2(0.3f,0.3f),
+						new BlockDisplay(new Vec2(), 0.3f, 0)));
+					
+					
+					
+					
+					
+				}});
+		expand.setOnClickListener(new Button.OnClickListener(){
+				public void onClick(Button b) {
+					if (blocks.visible)
+					{
+						blocks.visible = false;
+					}
+					else
+					{
+						blocks.visible = true;
+					}
+				}});
+		
+		elements.add(blocks);
+		elements.add(expand);
+		elements.add(place);
+		elements.add(delete);
 	}
 	public static void startDrawing()
 	{
