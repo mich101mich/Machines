@@ -3,12 +3,13 @@ import android.opengl.*;
 import com.M101M.Industria.GLHelp.*;
 import com.M101M.Industria.Utils.*;
 
-public class Rectangle extends UIElement
+public class Circle extends UIElement
 {
 	private static int matHandle, colHandle, vertexHandle, bufferHandle;
 	private static java.nio.ByteBuffer buffer;
-	int color;
-	public Rectangle(Vec2 pos, Vec2 size, int color)
+	private static final int accuracy = 50;
+	public int color;
+	public Circle(Vec2 pos, Vec2 size, int color)
 	{
 		super(pos, size);
 		this.color = color;
@@ -20,29 +21,38 @@ public class Rectangle extends UIElement
 		colHandle = Shader.getUniform("color");
 		vertexHandle = Shader.getAttribute("vertex");
 		bufferHandle = GLM.genBuffers(1)[0];
-		
-		float[] corners = {0,1, 1,1, 0,0, 1,0};
+
+		float[] corners = new float[accuracy * 2 + 2];
+		for (int i = 0; i < accuracy; i++)
+		{
+			corners[2*i + 2] = (float)-Math.sin(2.0 * Math.PI / accuracy * i);
+			corners[2*i + 3] = (float)-Math.cos(2.0 * Math.PI / accuracy * i);
+		}
 		GLM.vbo(bufferHandle, corners);
 		
-		buffer = Utils.toByteBuffer(new byte[]{ 0, 1, 2, 3 });
+		byte[] indices = new byte[accuracy + 2];
+		for (byte i = 0; i < accuracy + 1; i++)
+			indices[i] = i;
+		indices[accuracy + 1] = 1;
+		buffer = Utils.toByteBuffer(indices);
 	}
 	@Override
 	public void draw()
 	{
 		if (!visible || Utils.hexToArray(color)[3] < 0.01)
 			return;
-		
+
 		Shader.use(Shader.SHAPE);
-		
+
 		Mat model = Mat.identity()
 			.translate(pos.x, pos.y,0)
 			.scale(size.x, size.y,0);
-		
+
 		gl.glUniformMatrix4fv(matHandle, 1, false, Mat.multiply(GLM.uiMat, model).toArray(), 0);
 		gl.glUniform4fv(colHandle, 1, Utils.hexToArray(color),0);
 		GLM.useVBO(bufferHandle, vertexHandle, 2, 0);
 		
-		gl.glDrawElements(GLES20.GL_TRIANGLE_STRIP, 4, GLES20.GL_UNSIGNED_BYTE, buffer);
+		gl.glDrawElements(GLES20.GL_TRIANGLE_FAN, accuracy + 2, GLES20.GL_UNSIGNED_BYTE, buffer);
 	}
 	@Override
 	public boolean handleTouch(TouchEvent e)

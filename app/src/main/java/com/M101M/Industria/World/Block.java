@@ -34,9 +34,7 @@ public class Block
 			handle[i] = Shader.getAttribute(names[i]);
 
 		System.arraycopy(GLM.genBuffers(2), 0, handle, BUFFER, 2);
-		gl.glBindBuffer(GLES30.GL_ARRAY_BUFFER, handle[BUFFER]);
-		gl.glBufferData(GLES30.GL_ARRAY_BUFFER, 96, Utils.toFloatBuffer(new float[]{0,0,0, 0,0,1, 0,1,0, 1,0,0, 0,1,1, 1,0,1, 1,1,0, 1,1,1}), GLES30.GL_STATIC_DRAW);
-		gl.glBindBuffer(GLES30.GL_ARRAY_BUFFER, 0);
+		GLM.vbo(handle[BUFFER], new float[]{0,0,0, 0,0,1, 0,1,0, 1,0,0, 0,1,1, 1,0,1, 1,1,0, 1,1,1});
 
 		gl.glBindBuffer(GLES30.GL_ELEMENT_ARRAY_BUFFER, handle[INDEX]);
 		gl.glBufferData(GLES30.GL_ELEMENT_ARRAY_BUFFER, 36, Utils.toByteBuffer(new byte[]{1,5,4,4,5,7, 5,3,7,7,3,6, 3,0,6,6,0,2, 0,1,2,2,1,4, 0,3,1,1,3,5, 4,7,2,2,7,6}), GLES30.GL_STATIC_DRAW);
@@ -51,10 +49,7 @@ public class Block
 	{
 		Shader.use(Shader.BLOCK);
 		gl.glBindBuffer(GLES30.GL_ELEMENT_ARRAY_BUFFER, handle[INDEX]);
-
-		gl.glBindBuffer(GLES30.GL_ARRAY_BUFFER, handle[BUFFER]);
-		gl.glVertexAttribPointer(handle[VERTEX], 3, GLES30.GL_FLOAT, false, 12, 0);
-		
+		GLM.useVBO(handle[BUFFER], handle[VERTEX], 3, 0);
 		
 		Mat model = Mat.identity()
 			.rotate(Vec.negative(Game.player.rot))
@@ -72,15 +67,19 @@ public class Block
 		double delta = (Math.toDegrees(Math.atan2(pos.x + 0.5 - Game.player.pos.x, pos.z + 0.5 - Game.player.pos.z)) - Game.player.rot.y + 520) % 360;
 		if ((delta > 180 ? 360 - delta : delta) > 180 - (dist / GLM.renderDistance) * 150)
 			return;
+		int count = 0;
+		for (; count < 6; count++)
+			if (!(pos.y == 0 && count == 5) && Game.map.getBlock(pos, count) == null)
+				break;
+		if (count == 6)
+			return;
 
 		if (!initialised)
 			init();
 
 		gl.glUniform4fv(handle[POS], 1, new Vec(pos).toArray(), 0);
 		gl.glUniform1i(handle[TYPE], type);
-		gl.glBindBuffer(GLES30.GL_ARRAY_BUFFER, Shader.matHandle);
-		gl.glVertexAttribPointer(handle[MATERIAL], 4, GLES30.GL_FLOAT, false, 0, type*Shader.matStride);
-		gl.glBindBuffer(GLES20.GL_ARRAY_BUFFER, 0);
+		GLM.useVBO(Shader.matHandle, handle[MATERIAL], 4, type*Shader.matStride);
 
 		gl.glDrawElements(GLES30.GL_TRIANGLES, 36, GLES30.GL_UNSIGNED_BYTE, 0);
 	}

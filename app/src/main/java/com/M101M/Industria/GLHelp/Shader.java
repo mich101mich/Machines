@@ -14,10 +14,7 @@ public class Shader
 		float[] mat = new float[materials.length * 4];
 		for (int i=0; i < materials.length; i++)
 			System.arraycopy(Utils.hexToArray(materials[i]), 0, mat, i * 4, 4);
-		gl.glBindBuffer(GLES20.GL_ARRAY_BUFFER, matHandle);
-		gl.glBufferData(GLES30.GL_ARRAY_BUFFER, mat.length * 4, Utils.toFloatBuffer(mat), GLES30.GL_STATIC_DRAW);
-		
-		gl.glBindBuffer(GLES20.GL_ARRAY_BUFFER, 0);
+		GLM.vbo(matHandle, mat);
 		
 		programs = new int[10];
 		
@@ -31,9 +28,9 @@ public class Shader
 			GLM.loadShader(GLES20.GL_FRAGMENT_SHADER, planeFrag)
 		);
 		
-		programs[RECTANGLE] = GLM.createProgram(
-			GLM.loadShader(GLES20.GL_VERTEX_SHADER, rectangleVert),
-			GLM.loadShader(GLES20.GL_FRAGMENT_SHADER, rectangleFrag)
+		programs[SHAPE] = GLM.createProgram(
+			GLM.loadShader(GLES20.GL_VERTEX_SHADER, shapeVert),
+			GLM.loadShader(GLES20.GL_FRAGMENT_SHADER, shapeFrag)
 		);
 		
 		programs[TEXT] = GLM.createProgram(
@@ -57,7 +54,7 @@ public class Shader
 		return ret;
 	}
 	
-	public static final int BLOCK=0, PLANE=1, RECTANGLE=2, TEXT=3;
+	public static final int BLOCK=0, PLANE=1, SHAPE=2, TEXT=3;
 	private static int programs[], program;
 	private static final String[] blockVert = {
 		"uniform mat4 mvpMat;",
@@ -117,13 +114,13 @@ public class Shader
 		"				gl_FragColor = vec4(0,0,0,1);",
 		"		else gl_FragColor = vec4(0.5,0.5,0.5,1);",
 		"}"
-	}, rectangleVert = {
+	}, shapeVert = {
 		"uniform mat4 mvpMat;",
 		"attribute vec4 vertex;",
 		"void main() {",
 		"		gl_Position = mvpMat * vertex;",
 		"}"
-	}, rectangleFrag = {
+	}, shapeFrag = {
 		"uniform vec4 color;",
 		"void main() {",
 		"		gl_FragColor = color;",

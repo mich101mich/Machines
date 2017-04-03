@@ -125,6 +125,8 @@ public class UI
 		elements.add(expand);
 		elements.add(place);
 		elements.add(delete);
+		
+		elements.add(new Circle(new Vec2(-GLM.ratio + 0.2f, 0.8f), new Vec2(0.2f,0.2f), 0xaaaaaa));
 	}
 	public static void startDrawing()
 	{

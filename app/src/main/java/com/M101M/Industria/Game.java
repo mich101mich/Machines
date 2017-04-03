@@ -24,6 +24,7 @@ public class Game
 		Block.globalInit();
 		Plane.globalInit();
 		Rectangle.globalInit();
+		Circle.globalInit();
 		Text.globalInit();
 
 		ground = new Plane(new Vec(0,-0.01f,0));
@@ -37,6 +38,15 @@ public class Game
 		for (int i=0; i<5; i++)
 			for (int j=0; j<10; j++)
 				map.set(new Block(-i,0,-j, i), false);
+				
+		java.util.Random r = new java.util.Random();
+		for (int i = 0; i < 500; i++)
+			for (int j = 0; j < 500; j++)
+			{
+				map.set(new Block(i+1, 0, j+1, Type.cable/*r.nextInt(5)*/), false);
+				map.set(new Block(i+1, 1, j+1, Type.cable/*r.nextInt(5)*/), false);
+				map.set(new Block(i+1, 2, j+1, Type.cable/*r.nextInt(5)*/), false);
+			}
 	}
 	public static void stop()
 	{

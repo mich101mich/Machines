@@ -26,6 +26,18 @@ public class GLM
 		gl.glLinkProgram(program);
 		return program;
 	}
+	public static void vbo(int handle, float[] values)
+	{
+		gl.glBindBuffer(GLES30.GL_ARRAY_BUFFER, handle);
+		gl.glBufferData(GLES30.GL_ARRAY_BUFFER, values.length * 4, Utils.toFloatBuffer(values), GLES30.GL_STATIC_DRAW);
+		gl.glBindBuffer(GLES30.GL_ARRAY_BUFFER, 0);
+	}
+	public static void useVBO(int bufferHandle, int vertexHandle, int floatsPerVertex, int offset)
+	{
+		gl.glBindBuffer(GLES30.GL_ARRAY_BUFFER, bufferHandle);
+		gl.glVertexAttribPointer(vertexHandle, floatsPerVertex, GLES30.GL_FLOAT, false, 0, offset);
+		gl.glBindBuffer(GLES30.GL_ARRAY_BUFFER, 0);
+	}
 	public static void setup()
 	{
 		buffers = new int[64]; bufferCount = 0;

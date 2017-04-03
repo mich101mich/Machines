@@ -24,10 +24,7 @@ public class Plane
 		handles[VERTEX] = Shader.getAttribute("vertex");
 
 		System.arraycopy(GLM.genBuffers(2),0, handles,BUFFER, 2);
-		gl.glBindBuffer(GLES20.GL_ARRAY_BUFFER, handles[BUFFER]);
-		gl.glEnableVertexAttribArray(handles[BUFFER]);
-		gl.glBufferData(GLES20.GL_ARRAY_BUFFER, 48, Utils.toFloatBuffer(new float[]{-50,0,50, 50,0,50, -50,0,-50, 50,0,-50}), GLES20.GL_STATIC_DRAW);
-		gl.glBindBuffer(GLES20.GL_ARRAY_BUFFER, 0);
+		GLM.vbo(handles[BUFFER], new float[]{-50,0,50, 50,0,50, -50,0,-50, 50,0,-50});
 		
 		gl.glBindBuffer(GLES20.GL_ELEMENT_ARRAY_BUFFER, handles[INDEX]);
 		gl.glBufferData(GLES20.GL_ELEMENT_ARRAY_BUFFER, 4, Utils.toByteBuffer(new byte[]{0,1,2,3}), GLES20.GL_STATIC_DRAW);
@@ -37,9 +34,7 @@ public class Plane
 	{
 		Shader.use(Shader.PLANE);
 		gl.glBindBuffer(GLES20.GL_ELEMENT_ARRAY_BUFFER, handles[INDEX]);
-		gl.glBindBuffer(GLES20.GL_ARRAY_BUFFER, handles[BUFFER]);
-		gl.glVertexAttribPointer(handles[VERTEX], 3, GLES20.GL_FLOAT, false, 0, 0);
-		gl.glBindBuffer(GLES20.GL_ARRAY_BUFFER, 0);
+		GLM.useVBO(handles[BUFFER], handles[VERTEX], 3, 0);
 		
 		Mat model = Mat.identity()
 			.rotate(Vec.negative(Game.player.rot))
