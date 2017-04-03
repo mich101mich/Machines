@@ -156,12 +156,13 @@ public class OpenGLView extends GLSurfaceView
 				}});
 		if (t == null)
 			return;
-		float[] tpos = new float[]{t.x(),-t.y(),-3,0}, out = new float[4];
-		Matrix.setIdentityM(GLM.transMat, 0);
-		Matrix.rotateM(GLM.transMat, 0, Game.player.rot.y, 0, 1, 0);
-		Matrix.rotateM(GLM.transMat, 0, Game.player.rot.x, 1, 0, 0);
-		Matrix.multiplyMV(out, 0, GLM.transMat, 0, tpos, 0);
-		Vec dir = new Vec(out);
+		
+		Vec tpos = new Vec(t.x(),-t.y(),-3);
+		Vec dir = Mat.identity()
+			.rotate(0, Game.player.rot.y, 0)
+			.rotate(Game.player.rot.x, 0, 0)
+			.multiply(tpos);
+		
 		Veci target = Utils.rayHit(Game.player.pos, dir);
 		if (target == null)
 			Game.player.selected = null;
@@ -211,9 +212,6 @@ public class OpenGLView extends GLSurfaceView
 				PhysicUpdate();
 
 				GLM.startDrawing();
-
-				GLM.rotate(Vec.negative(Game.player.rot));
-				GLM.translate(Vec.negative(Game.player.pos));
 
 				Block.startDrawing();
 				Game.map.draw();

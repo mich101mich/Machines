@@ -24,12 +24,7 @@ public class Vec
 	{ x*=by; y*=by; z*=by; return this; }
 	public Vec move(Vec by,Vec dir)
 	{
-		float[] mat = new float[16];
-		float[] c = new float[4];
-		Utils.setRotation(mat,0,Vec.negative(dir));
-		Matrix.multiplyMV(c,0, mat,0, by.toArray(),0);
-		add(new Vec(c));
-		return this;
+		return add(Mat.identity().rotate(Vec.negative(dir)).multiply(by));
 	}
 	public float length()
 	{ return (float)Math.sqrt(x*x + y*y + z*z); }

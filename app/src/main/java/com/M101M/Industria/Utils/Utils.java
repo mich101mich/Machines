@@ -72,19 +72,6 @@ public class Utils
 			(float)(y*Math.cos(angle) - x*Math.sin(angle))
 		};
 	}
-	public static void multiply(float[] left,int leftOffset, float[] right,int rightOffset)
-	{
-		float[] temp = new float[16];
-		Matrix.multiplyMM(temp,0, left,leftOffset, right,rightOffset);
-		System.arraycopy(temp,0, left,leftOffset, 16);
-	}
-	public static void setRotation(float[] m,int mOff, Vec angle)
-	{
-		Matrix.setIdentityM(m,mOff);
-		Matrix.rotateM(m,mOff, angle.x, 1,0,0);
-		Matrix.rotateM(m,mOff, angle.y, 0,1,0);
-		Matrix.rotateM(m,mOff, angle.z, 0,0,1);
-	}
 	public static Veci rayHit(Vec start, Vec dir)
 	{
 		Vec p = new Vec(start);

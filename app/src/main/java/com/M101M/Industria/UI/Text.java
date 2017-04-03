@@ -52,7 +52,7 @@ public class Text extends Rectangle
 			return;
 		super.draw();
 		Shader.use(Shader.TEXT);
-		gl.glUniformMatrix4fv(matHandle, 1, false, GLM.uiMat, 0);
+		gl.glUniformMatrix4fv(matHandle, 1, false, GLM.uiMat.toArray(), 0);
 		gl.glUniform4fv(colHandle, 1, Utils.hexToArray(textColor),0);
 		gl.glVertexAttribPointer(uvHandle, 2, GLES20.GL_FLOAT, false, 0, Utils.toFloatBuffer(new float[]{0,0, 0,TEXT_HEIGHT, TEXT_WIDTH, 0, TEXT_WIDTH, TEXT_HEIGHT}));
 		float lw = TEXT_WIDTH * scale, lh = TEXT_HEIGHT * scale;

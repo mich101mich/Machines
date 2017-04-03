@@ -23,21 +23,22 @@ public class BlockDisplay extends UIElement
 			return;
 		b.type = type;
 		
-		Vec player = Game.player.pos;
-		Game.player.pos = new Vec(b.pos);
-		float[] oldMat = new float[16];
-		System.arraycopy(GLM.mvpMat,0, oldMat,0, 16);
-		System.arraycopy(GLM.uiMat,0, GLM.mvpMat,0, 16);
+		Player player = Game.player;
+		Mat vpMat = GLM.vpMat;
 		
-		GLM.translate(new Vec(pos.x, pos.y, 0));
-		GLM.scale(new Vec(size.x,size.x,1));
+		Game.player = new Player();
+		Game.player.rot = new Vec();
+		Game.player.pos = new Vec(b.pos);
+		GLM.vpMat = new Mat(GLM.uiMat)
+			.translate(pos.x, pos.y, 0)
+			.scale(size.x,size.x,1);
 		
 		Block.startDrawing();
 		b.draw();
 		UI.startDrawing();
 		
-		System.arraycopy(oldMat,0, GLM.mvpMat,0, 16);
-		Game.player.pos = player;
+		GLM.vpMat = vpMat;
+		Game.player = player;
 	}
 	@Override
 	public boolean handleTouch(TouchEvent e)

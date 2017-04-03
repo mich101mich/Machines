@@ -38,9 +38,13 @@ public class Plane
 		Shader.use(Shader.PLANE);
 		gl.glBindBuffer(GLES20.GL_ELEMENT_ARRAY_BUFFER, handles[INDEX]);
 		gl.glBindBuffer(GLES20.GL_ARRAY_BUFFER, handles[BUFFER]);
-		gl.glVertexAttribPointer(handles[VERTEX], 3, GLES20.GL_FLOAT, false, 12, 0);
+		gl.glVertexAttribPointer(handles[VERTEX], 3, GLES20.GL_FLOAT, false, 0, 0);
 		gl.glBindBuffer(GLES20.GL_ARRAY_BUFFER, 0);
-		gl.glUniformMatrix4fv(handles[MAT], 1, false, GLM.mvpMat, 0);
+		
+		Mat model = Mat.identity()
+			.rotate(Vec.negative(Game.player.rot))
+			.translate(Vec.negative(Game.player.pos));
+		gl.glUniformMatrix4fv(handles[MAT], 1, false, Mat.multiply(GLM.vpMat, model).toArray(), 0);
 	}
 	public void draw ()
 	{

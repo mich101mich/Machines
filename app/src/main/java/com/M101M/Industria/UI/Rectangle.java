@@ -5,7 +5,7 @@ import com.M101M.Industria.Utils.*;
 
 public class Rectangle extends UIElement
 {
-	private static int matHandle, colHandle, vertexHandle;
+	protected static int matHandle, colHandle, vertexHandle, bufferHandle;
 	int color;
 	public Rectangle(Vec2 pos, Vec2 size, int color)
 	{
@@ -18,6 +18,12 @@ public class Rectangle extends UIElement
 		matHandle = Shader.getUniform("mvpMat");
 		colHandle = Shader.getUniform("color");
 		vertexHandle = Shader.getAttribute("vertex");
+		bufferHandle = GLM.genBuffers(1)[0];
+		
+		float[] corners = {0,1, 1,1, 0,0, 1,0};
+		gl.glBindBuffer(GLES30.GL_ARRAY_BUFFER, bufferHandle);
+		gl.glBufferData(GLES30.GL_ARRAY_BUFFER, corners.length * 4, Utils.toFloatBuffer(corners), GLES30.GL_STATIC_DRAW);
+		gl.glBindBuffer(GLES30.GL_ARRAY_BUFFER, 0);
 	}
 	@Override
 	public void draw()
@@ -27,13 +33,15 @@ public class Rectangle extends UIElement
 		
 		Shader.use(Shader.RECTANGLE);
 		
-		gl.glUniformMatrix4fv(matHandle, 1, false, GLM.uiMat, 0);
+		Mat model = Mat.identity()
+			.translate(pos.x, pos.y,0)
+			.scale(size.x, size.y,0);
+		
+		gl.glUniformMatrix4fv(matHandle, 1, false, Mat.multiply(GLM.uiMat, model).toArray(), 0);
 		gl.glUniform4fv(colHandle, 1, Utils.hexToArray(color),0);
-		gl.glVertexAttribPointer(vertexHandle, 2, GLES20.GL_FLOAT, false, 8, Utils.toFloatBuffer(new float[]{
-					pos.x, pos.y,
-					pos.x, pos.y + size.y,
-					pos.x + size.x, pos.y,
-					pos.x + size.x,  pos.y + size.y }));
+		gl.glBindBuffer(GLES30.GL_ARRAY_BUFFER, bufferHandle);
+		gl.glVertexAttribPointer(vertexHandle, 2, GLES30.GL_FLOAT, false, 0, 0);
+		gl.glBindBuffer(GLES30.GL_ARRAY_BUFFER, 0);
 		
 		gl.glDrawElements(GLES20.GL_TRIANGLE_STRIP, 4, GLES20.GL_UNSIGNED_BYTE, Utils.toByteBuffer(new byte[]{ 0, 1, 2, 3 }));
 	}

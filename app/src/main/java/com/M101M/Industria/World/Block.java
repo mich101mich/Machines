@@ -35,9 +35,7 @@ public class Block
 
 		System.arraycopy(GLM.genBuffers(2), 0, handle, BUFFER, 2);
 		gl.glBindBuffer(GLES30.GL_ARRAY_BUFFER, handle[BUFFER]);
-		gl.glEnableVertexAttribArray(handle[BUFFER]);
 		gl.glBufferData(GLES30.GL_ARRAY_BUFFER, 96, Utils.toFloatBuffer(new float[]{0,0,0, 0,0,1, 0,1,0, 1,0,0, 0,1,1, 1,0,1, 1,1,0, 1,1,1}), GLES30.GL_STATIC_DRAW);
-		gl.glVertexAttribPointer(handle[VERTEX], 3, GLES30.GL_FLOAT, false, 0, 0);
 		gl.glBindBuffer(GLES30.GL_ARRAY_BUFFER, 0);
 
 		gl.glBindBuffer(GLES30.GL_ELEMENT_ARRAY_BUFFER, handle[INDEX]);
@@ -56,8 +54,12 @@ public class Block
 
 		gl.glBindBuffer(GLES30.GL_ARRAY_BUFFER, handle[BUFFER]);
 		gl.glVertexAttribPointer(handle[VERTEX], 3, GLES30.GL_FLOAT, false, 12, 0);
-
-		gl.glUniformMatrix4fv(handle[MAT], 1, false, GLM.mvpMat, 0);
+		
+		
+		Mat model = Mat.identity()
+			.rotate(Vec.negative(Game.player.rot))
+			.translate(Vec.negative(Game.player.pos));
+		gl.glUniformMatrix4fv(handle[MAT], 1, false, Mat.multiply(GLM.vpMat, model).toArray(), 0);
 		gl.glUniform4fv(handle[SELECTED], 1, (Game.player.selected != null ? new Vec(Game.player.selected.pos).toArray() : new float[]{0,-5,0,0}), 0);
 		gl.glUniform1i(handle[TICK], Game.time);
 	}
