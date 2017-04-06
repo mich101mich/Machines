@@ -56,7 +56,7 @@ public class Block
 			.translate(Vec.negative(Game.player.pos));
 		gl.glUniformMatrix4fv(handle[MAT], 1, false, Mat.multiply(GLM.vpMat, model).toArray(), 0);
 		gl.glUniform4fv(handle[SELECTED], 1, (Game.player.selected != null ? new Vec(Game.player.selected.pos).toArray() : new float[]{0,-5,0,0}), 0);
-		gl.glUniform1i(handle[TICK], Game.time);
+		gl.glUniform1i(handle[TICK], Game.time % 1000);
 	}
 
 	public void draw()
@@ -119,20 +119,24 @@ public class Block
 			type = Type.cablePow;
 		else if (type == Type.cablePow && !pow)
 			type = Type.cable;
+		else if (type == Type.fan && pow)
+			type = Type.fanPow;
+		else if (type == Type.fanPow && !pow)
+			type = Type.fan;
 		else
 			return;
 		Game.addUpdates(pos);
 	}
-	final static int[] conductors = { Type.cable, Type.cablePow, Type.stone };
+	final static int[] conductors = { Type.cable, Type.cablePow, Type.stone, Type.fan, Type.fanPow };
 	final static int[] powerSources = { Type.stone };
 	boolean needsUpdate()
 	{
-		return (type == Type.cable || type == Type.cablePow)
+		return (type == Type.cable || type == Type.cablePow || type == Type.fan || type == Type.fanPow)
 			&& lastUpdate != Game.time;
 	}
 	boolean hasPower()
 	{
-		return type == Type.cablePow
+		return (type == Type.cablePow || type == Type.fanPow)
 			|| Utils.contains(powerSources, type);
 	}
 	boolean isSource()

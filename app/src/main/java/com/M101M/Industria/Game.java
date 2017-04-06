@@ -35,18 +35,15 @@ public class Game
 			map.set(new Block(0,i,0, Type.grass), false);
 		for (int i=1; i<10; i++)
 			map.set(new Block(0,0,i, Type.stone), false);
-		for (int i=0; i<5; i++)
+		for (int i=0; i<7; i++)
 			for (int j=0; j<10; j++)
 				map.set(new Block(-i,0,-j, i), false);
+		
 				
-		java.util.Random r = new java.util.Random();
-		for (int i = 0; i < 500; i++)
-			for (int j = 0; j < 500; j++)
-			{
-				map.set(new Block(i+1, 0, j+1, Type.cable/*r.nextInt(5)*/), false);
-				map.set(new Block(i+1, 1, j+1, Type.cable/*r.nextInt(5)*/), false);
-				map.set(new Block(i+1, 2, j+1, Type.cable/*r.nextInt(5)*/), false);
-			}
+		/*for (int i=-50; i<50; i++)
+			for (int j=-50; j<50; j++)
+				map.set(new Block(-i,0,-j, Type.cablePow), false);
+				*/
 	}
 	public static void stop()
 	{

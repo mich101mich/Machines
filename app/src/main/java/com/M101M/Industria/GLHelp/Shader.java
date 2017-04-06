@@ -74,28 +74,50 @@ public class Shader
 		"varying vec4 pos;",
 		"varying float sel;",
 		"varying vec4 color;",
-		"void set(float f, vec4 col) {",
+		"void set(float f, vec4 col) {",//5
 		"		gl_FragColor = f*col + (1.0-f)*vec4(vec3(1,1,1)-col.rgb,1);",
+		"}",
+		"float si(float x) {", // sin with x between 0 and 2
+		"		x = mod(x, 2.0);",
+		"		return (x < 1.0 ? -4.0*(x-0.5)*(x-0.5)+1.0 : 4.0*(x-1.5)*(x-1.5)-1.0);",//10
 		"}",
 		"void main() {",
 		"		float f = 1.0;",
 		"		if (sel == 1.0)",
-		"				f = sin(6.2832*float(tick-tick/" + (1300 / Game.tps) + "*" + (1300 / Game.tps) + ")/" + (1300 / Game.tps) + ".0)/2.0+0.5;",
+		"				f = si(2.0*mod(float(tick), " + (1300 / Game.tps) + ".0))/2.0+0.5;",//15
 		"		set(f, color);",
+		"		float u = (pos.x == 0.0 ? pos.z : (pos.x == 1.0 ? 1.0-pos.z : (pos.z == 0.0 ? 1.0-pos.x : pos.x)));",
+		"		float v = (pos.y == 0.0 ? pos.z : (pos.y == 1.0 ? 1.0-pos.z : pos.y));",
 		"		if (type == " + Type.cable + " || type == " + Type.cablePow + ") {",
-		"       float d = 0.15, s = -1.0, l = 0.0;",
-		"				if (abs(pos.x-0.5) < d) { s = pos.x; l = (fract(pos.y) == 0.0 ? pos.z : pos.y); }",
-		"				if (abs(pos.y-0.5) < d) { s = pos.y; l = (fract(pos.z) == 0.0 ? pos.x : pos.z); }",
-		"				if (abs(pos.z-0.5) < d) { s = pos.z; l = (fract(pos.x) == 0.0 ? pos.y : pos.x); }",
-		"				if (s == -1.0 || (abs(s-0.5) < 0.027 && abs(l-0.5) >= d)) {",
+		"       float d = 0.15;",//20
+		"				if (abs(v - 0.5) < d) { float x = u; u = v; v = x; }",
+		"				if (abs(u - 0.5) >= d || (abs(u-0.5) < 0.027 && abs(v-0.5) >= d)) {",
 		"						set(f, vec4(0,0,0,1));",
 		"						return;",
-		"				}",
-		"				if (type != " + Type.cablePow + " || abs(l-0.5) < d)",
+		"				}",//25
+		"				if (type != " + Type.cablePow + " || abs(v-0.5) < d)",
 		"						return;",
-		"				s -= 0.5-d;",
-		"				float c = 0.28*sin(6.28319*((s<d ? l : 1.0-l) + float(tick)/" + (600 / Game.tps) + ".0));",
-		"				set(f, color + vec4(c,c,c,0));",
+		"				u -= 0.5-d;",
+		"				float c = 0.28*si(2.0*((u<d ? v : 1.0-v) + float(tick)/" + (600 / Game.tps) + ".0));",
+		"				set(f, color + vec4(c,c,c,0));",//30
+		"				return;",
+		"		}",
+		"		if (type == " + Type.fan + " || type == " + Type.fanPow + ") {",
+		"				int borders = (pos.x < 0.07 || pos.x > 0.93 ? 1 : 0) + (pos.y < 0.07 || pos.y > 0.93 ? 1 : 0) + (pos.z < 0.07 || pos.z > 0.93 ? 1 : 0);",
+		"				float c = 0.0;",//35
+		"				if (borders == 3 && type == " + Type.fan + ")",
+		"						set(f, vec4(0.7, 0, 0, 1));",
+		"				else if (borders == 3)",
+		"						set(f, vec4(0, 0.7, 0, 1));",
+		"				else if (borders == 2)",//40
+		"						set(f, vec4(0,0,0,1));",
+		"				else if (u*u-u+v*v-v+0.5 < 0.02)",
+		"						set(f, color);",
+		"				else {",
+		"						float tim = (type == " + Type.fanPow + " ? float(tick)/27.5 : 0.4);",//45
+		"						float c = mod(floor((atan(v-0.5, u-0.5)/3.14159/2.0 + 1.0 + tim - 0.08*sqrt(u*u-u+v*v-v+0.5))*6.0), 2.0);",
+		"						set(f, vec4(c * color.rgb + (1.0-c)*vec3(0.5,0.5,0.5), 1));",
+		"				}",
 		"		}",
 		"}"
 	}, planeVert = {
@@ -153,7 +175,9 @@ public class Shader
 		0x888888,0x888888,0x888888,0x888888,0x888888,0x888888,0x888888,0x888888,
 		0xcc2200,0xcc2200,0xcc2200,0xcc2200,0xcc2200,0xcc2200,0xcc2200,0xcc2200,
 		0x008800,0x008800,0x008800,0x008800,0x008800,0x008800,0x008800,0x008800,
-		0x00dd00,0x00dd00,0x00dd00,0x00dd00,0x00dd00,0x00dd00,0x00dd00,0x00dd00
+		0x00dd00,0x00dd00,0x00dd00,0x00dd00,0x00dd00,0x00dd00,0x00dd00,0x00dd00,
+		0xaaaaaa,0xaaaaaa,0xaaaaaa,0xaaaaaa,0xaaaaaa,0xaaaaaa,0xaaaaaa,0xaaaaaa,
+		0xbbbbbb,0xbbbbbb,0xbbbbbb,0xbbbbbb,0xbbbbbb,0xbbbbbb,0xbbbbbb,0xbbbbbb,
 	};
 
 	public static int letterHandle, letterStride=6;
