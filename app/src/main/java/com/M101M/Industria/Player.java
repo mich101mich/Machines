@@ -8,5 +8,6 @@ public class Player
 	public Block selected;
 	public int placeType = 0;
 	public int action;
-	public static final int SELECT=0, PLACE=1, PLACE_DRAG=2, DELETE=3, DELETE_DRAG=4;
+	public static final float walkSpeed = 0.35f, lookSpeed = 1.2f;
+	public static final int SELECT=0, PLACE=1, DELETE=2;
 }

@@ -7,12 +7,16 @@ public class Circle extends UIElement
 {
 	private static int matHandle, colHandle, vertexHandle, bufferHandle;
 	private static java.nio.ByteBuffer buffer;
-	private static final int accuracy = 50;
+	private static final int accuracy = 30;
 	public int color;
 	public Circle(Vec2 pos, Vec2 size, int color)
 	{
 		super(pos, size);
 		this.color = color;
+	}
+	public Circle(Vec2 pos, float radius, int color)
+	{
+		this(pos, new Vec2(2 * radius, 2 * radius), color);
 	}
 	public static void globalInit()
 	{
@@ -46,7 +50,7 @@ public class Circle extends UIElement
 
 		Mat model = Mat.identity()
 			.translate(pos.x, pos.y,0)
-			.scale(size.x, size.y,0);
+			.scale(size.x/2.0f, size.y/2.0f,0);
 
 		gl.glUniformMatrix4fv(matHandle, 1, false, Mat.multiply(GLM.uiMat, model).toArray(), 0);
 		gl.glUniform4fv(colHandle, 1, Utils.hexToArray(color),0);
@@ -59,4 +63,10 @@ public class Circle extends UIElement
 	{
 		return false;
 	}
+	@Override
+	public android.graphics.RectF bounds()
+	{
+		return new android.graphics.RectF(pos.x - size.x / 2, pos.y - size.y / 2, pos.x + size.x / 2, pos.y + size.y / 2);
+	}
+	
 }

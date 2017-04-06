@@ -54,15 +54,15 @@ public class Container extends Rectangle
 	}
 	private Vec2 getChildPos(UIElement child)
 	{
-		Vec2 p = Vec2.add(anchor, (isHorizontal() ? scrollOffset : 0), (isHorizontal() ? 0 : scrollOffset));
+		Vec2 p = Vec2.plus(anchor, (isHorizontal() ? scrollOffset : 0), (isHorizontal() ? 0 : scrollOffset));
 		switch (align)
 		{
 		case RIGHT:
-			return Vec2.sub(p, child.pos.x + child.size.x, 0);
+			return Vec2.minus(p, child.pos.x + child.size.x, 0);
 		case BOTTOM:
-			return Vec2.sub(p, 0, child.pos.y + child.size.y);
+			return Vec2.minus(p, 0, child.pos.y + child.size.y);
 		default:
-			return Vec2.add(p, child.pos);
+			return Vec2.plus(p, child.pos);
 		}
 	}
 	@Override

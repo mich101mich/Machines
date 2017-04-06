@@ -1,17 +1,29 @@
 package com.M101M.Industria.UI;
 
+import com.M101M.Industria.*;
+import com.M101M.Industria.UI.*;
 import com.M101M.Industria.Utils.*;
 
 public class Button extends Rectangle
 {
 	public UIElement content = null;
 	private OnClickListener listener = null;
-	public Button(Vec2 pos, Vec2 size, UIElement content, int background, OnClickListener l)
+	public String toolTip = null;
+	public Button(Vec2 pos, Vec2 size, UIElement content, String toolTip, int background, OnClickListener l)
 	{
 		super(pos, size, background);
 		this.content = content;
+		this.toolTip = toolTip;
 		listener = l;
 	}
+	public Button(Vec2 pos, Vec2 size, UIElement content, String toolTip, int background)
+	{ this(pos, size, content, toolTip, background, null); }
+	public Button(Vec2 pos, Vec2 size, UIElement content, String toolTip)
+	{ this(pos, size, content, toolTip, DEFAULT_COLOR, null); }
+	public Button(Vec2 pos, Vec2 size, UIElement content)
+	{ this(pos, size, content, null, DEFAULT_COLOR, null); }
+	public Button(Vec2 pos, Vec2 size)
+	{ this(pos, size, null, null, DEFAULT_COLOR, null); }
 	public void setOnClickListener(OnClickListener l)
 	{ listener = l; }
 
@@ -22,9 +34,25 @@ public class Button extends Rectangle
 		if (content != null)
 		{
 			Vec2 p = content.pos;
-			content.pos = Vec2.add(p, pos);
+			content.pos = Vec2.plus(p, pos);
 			content.draw();
 			content.pos = p;
+		}
+		if (toolTip != null && isPressed())
+		{
+			float width = 0.2f / new Text(new Vec2(), 1, toolTip).size.y;
+			Game.ui.popup = new Text(
+				new Vec2(pos.x < 0 ? 0 : -width, size.y).add(pos),
+				width,
+				toolTip,
+				0x0,
+				DEFAULT_COLOR) {
+					public void update() {
+						if (!isPressed())
+							Game.ui.popupDuration = 1;
+					}
+				};
+			Game.ui.popupDuration = -1;
 		}
 	}
 	
@@ -58,7 +86,7 @@ public class Button extends Rectangle
 			touchID = -1;
 		}
 	}
-	int touched = 0, touchID = -1;
+	private int touched = 0, touchID = -1;
 	@Override
 	public boolean handleTouch(TouchEvent e)
 	{
@@ -96,26 +124,16 @@ public class Button extends Rectangle
 		}
 		return false;
 	}
+	public boolean isPressed()
+	{
+		return touchID != -1;
+	}
+	
+	
 	public static interface OnClickListener
 	{
 		public void onClick(Button b);
 	}
 	
-	public Button(Vec2 pos, Vec2 size, UIElement content, int background)
-	{ this(pos, size, content, background, null); }
-	public Button(Vec2 pos, Vec2 size, UIElement content, OnClickListener l)
-	{ this(pos, size, content, 0xaaaaaa, l); }
-	public Button(Vec2 pos, Vec2 size, int background, OnClickListener l)
-	{ this(pos, size, null, background, l); }
-	public Button(Vec2 pos, UIElement content, int background, OnClickListener l)
-	{ this(pos, content.size, content, background, l); }
-	
-	public Button(Vec2 pos, Vec2 size, UIElement content)
-	{ this(pos, size, content, null); }
-	
-	public Button(Vec2 pos, Vec2 size, String text, int textColor, int background, OnClickListener l)
-	{ this(pos, size, new Text(pos, size.x, text, textColor), background, l); }
-	public Button(Vec2 pos, float width, String text, int textColor)
-	{ this(pos, new Text(pos, width, text).size, new Text(pos, width, text, textColor)); }
-	
+	public static final int DEFAULT_COLOR = 0xaaaaaa;
 }

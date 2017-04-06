@@ -27,23 +27,29 @@ public class Vec2
 		return false;
 	}
 	
-	public Vec2 plus(Vec2 r)
+	public Vec2 add(Vec2 r)
 	{ x += r.x; y += r.y; return this;}
-	public Vec2 plus(float x, float y)
-	{ return plus(new Vec2(x,y)); }
-	public Vec2 minus(Vec2 r)
-	{ return plus(negative(r)); }
-	public Vec2 minus(float x, float y)
-	{ return minus(new Vec2(x,y)); }
+	public Vec2 add(float x, float y)
+	{ return add(new Vec2(x,y)); }
+	public Vec2 sub(Vec2 r)
+	{ return add(negative(r)); }
+	public Vec2 sub(float x, float y)
+	{ return sub(new Vec2(x,y)); }
+	public Vec2 scale(float factor)
+	{ x *= factor; y *= factor; return this; }
+	public float length()
+	{ return (float)Math.sqrt(x*x + y*y); }
+	public Vec2 unit()
+	{ return scale(1.0f / length()); }
 	
-	public static Vec2 add(Vec2 l, Vec2 r)
-	{ return new Vec2(l).plus(r); }
-	public static Vec2 sub(Vec2 l, Vec2 r)
-	{ return new Vec2(l).minus(r); }
-	public static Vec2 add(Vec2 l, float xr, float yr)
-	{ return new Vec2(l).plus(xr,yr); }
-	public static Vec2 sub(Vec2 l, float xr, float yr)
-	{ return new Vec2(l).minus(xr,yr); }
+	public static Vec2 plus(Vec2 l, Vec2 r)
+	{ return new Vec2(l).add(r); }
+	public static Vec2 minus(Vec2 l, Vec2 r)
+	{ return new Vec2(l).sub(r); }
+	public static Vec2 plus(Vec2 l, float xr, float yr)
+	{ return new Vec2(l).add(xr,yr); }
+	public static Vec2 minus(Vec2 l, float xr, float yr)
+	{ return new Vec2(l).sub(xr,yr); }
 	public static Vec2 negative(Vec2 v)
 	{ return new Vec2(-v.x, -v.y); }
 }

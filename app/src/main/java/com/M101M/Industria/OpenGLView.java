@@ -104,7 +104,6 @@ public class OpenGLView extends GLSurfaceView
 		}
 	}
 
-	final float walkSpeed = 0.3f, lookSpeed = 2.5f;
 	long lastUpdate = System.currentTimeMillis(), delta = 0;
 	void PhysicUpdate()
 	{
@@ -121,33 +120,6 @@ public class OpenGLView extends GLSurfaceView
 		{
 			Game.update();
 			delta -= 1000 / Game.tps;
-		}
-
-		Vec dp = new Vec(), dr = new Vec();
-		boolean chg = false;
-		for (TouchEvent t : touch)
-		{
-			if (t.handled)
-				continue;
-			if (Math.abs(t.x()) > 0.7 * GLM.ratio)
-			{
-				if (Math.abs(t.y()) < 0.3) dr.y += -Math.signum(t.x());
-				else										 		 dp.x += Math.signum(t.x());
-				t.handled = chg = true;
-			}
-			if (Math.abs(t.y()) > 0.7)
-			{
-				if (Math.abs(t.x()) < 0.3 * GLM.ratio) dr.x += -Math.signum(t.y());
-				else										 							 dp.z += Math.signum(t.y());
-				t.handled = chg = true;
-			}
-		}
-		if (chg)
-		{
-			Game.player.pos.move(dp.scale(walkSpeed), new Vec(0, -Game.player.rot.y, 0)).add(new Vec(200, 0, 200)).modulo(400).add(new Vec(-200, 0, -200));
-			Game.player.rot.add(dr.scale(lookSpeed));
-			Game.player.rot.x = Math.min(70, Math.max(-70, Game.player.rot.x));
-			Game.player.rot.y = (Game.player.rot.y + 360) % 360;
 		}
 
 		TouchEvent t = touch.find(new Arr.Condition<TouchEvent>() {public
@@ -176,14 +148,12 @@ public class OpenGLView extends GLSurfaceView
 			case Player.PLACE:
 				if (t.type() != t.DOWN)
 					break;
-			case Player.PLACE_DRAG:
 				target = Utils.rayHitEnd(Game.player.pos, dir);
 				Game.map.set(new Block(target, Game.player.placeType));
 				break;
 			case Player.DELETE:
 				if (t.type() != t.DOWN)
 					break;
-			case Player.DELETE_DRAG:
 				Game.map.remove(target);
 				break;
 			}
