@@ -6,10 +6,9 @@ import com.M101M.Industria.Utils.*;
 
 public class Chunk
 {
-	private Veci pos;
-	private Arr<Block> blocks = new Arr<Block>(30);
-	private Block[][][] chunk = new Block[8][8][8];
-	private int needsUpdate = 0;
+	Veci pos;
+	Arr<Block> blocks = new Arr<Block>(30);
+	Block[][][] chunk = new Block[8][8][8];
 	public Chunk(Veci position)
 	{
 		pos = toChunkVec(position);
@@ -27,8 +26,6 @@ public class Chunk
 		if (b == null || !inChunk(b.pos))
 			return false;
 		remove(b.pos);
-		if (b.needsUpdate())
-			needsUpdate++;
 		blocks.add(b);
 		set(b.pos, b);
 		return true;
@@ -39,8 +36,6 @@ public class Chunk
 	{
 		if (b == null || getBlock(b.pos) != b)
 			return false;
-		if (b.needsUpdate())
-			needsUpdate--;
 		blocks.remove(b);
 		set(b.pos, null);
 		return true;
@@ -63,6 +58,11 @@ public class Chunk
 			return;
 		for (Block b : blocks)
 			b.draw();
+	}
+	public void update()
+	{
+		for (Block b : blocks)
+			b.update();
 	}
 	public static Veci toChunkVec(Veci p)
 	{

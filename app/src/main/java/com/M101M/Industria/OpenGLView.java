@@ -104,7 +104,6 @@ public class OpenGLView extends GLSurfaceView
 		}
 	}
 
-	long lastUpdate = System.currentTimeMillis(), delta = 0;
 	void PhysicUpdate()
 	{
 		handleTouch();
@@ -112,15 +111,7 @@ public class OpenGLView extends GLSurfaceView
 		for (TouchEvent t : touch)
 			Game.ui.onTouch(t);
 
-		long dt = System.currentTimeMillis() - lastUpdate;
-		lastUpdate += dt;
-		delta += dt;
-		int updates = 0;
-		while (delta >= 1000 / Game.tps && ++updates < 10)
-		{
-			Game.update();
-			delta -= 1000 / Game.tps;
-		}
+		Game.update();
 
 		TouchEvent t = touch.find(new Arr.Condition<TouchEvent>() {public
 				boolean test(TouchEvent e) {
@@ -176,7 +167,7 @@ public class OpenGLView extends GLSurfaceView
 		{
 			try
 			{
-				Game.time = (Game.time + 1) % 10000;
+				Game.time = (Game.time + 1) % 100000;
 
 				Game.ui.update();
 				PhysicUpdate();

@@ -9,12 +9,13 @@ public class Block
 {
 	public Veci pos;
 	public int type;
-	public Block source;
-	private static final int MAT=0, POS=1, SELECTED=2, TICK=3, TYPE=4, VERTEX=5, MATERIAL=6, BUFFER=7, INDEX=8;
-	private static int handle[] = new int[9];
-	private boolean initialised = false;
-	private int lastUpdate = -1;
-
+	public Grid grid = null;
+	public boolean hasBlockUpdate = false;
+	public float heat = 0.0f;
+	public Block[] neighbours = new Block[6];
+	private static final int MAT=0, POS=1, SELECTED=2, TICK=3, TYPE=4, HEAT=5, VERTEX=6, MATERIAL=7, BUFFER=8, INDEX=9;
+	private static int handle[] = new int[10];
+	
 	public Block(int x, int y, int z, int type)
 	{ this(new Veci(x, y, z), type); }
 	public Block(Veci position, int type)
@@ -26,8 +27,8 @@ public class Block
 	public static void globalInit()
 	{
 		Shader.use(Shader.BLOCK);
-		final String[] names = { "mvpMat", "position", "selected", "tick", "type", "vertex", "material" };
-		for (int i=0; i < 5; i++)
+		final String[] names = { "mvpMat", "position", "selected", "tick", "type", "heat", "vertex", "material" };
+		for (int i=0; i < 6; i++)
 			handle[i] = Shader.getUniform(names[i]);
 
 		for (int i=VERTEX; i <= MATERIAL; i++)
@@ -38,11 +39,6 @@ public class Block
 
 		gl.glBindBuffer(GLES30.GL_ELEMENT_ARRAY_BUFFER, handle[INDEX]);
 		gl.glBufferData(GLES30.GL_ELEMENT_ARRAY_BUFFER, 36, Utils.toByteBuffer(new byte[]{1,5,4,4,5,7, 5,3,7,7,3,6, 3,0,6,6,0,2, 0,1,2,2,1,4, 0,3,1,1,3,5, 4,7,2,2,7,6}), GLES30.GL_STATIC_DRAW);
-	}
-	void init()
-	{
-
-		initialised = true;
 	}
 
 	public static void startDrawing()
@@ -56,7 +52,7 @@ public class Block
 			.translate(Vec.negative(Game.player.pos));
 		gl.glUniformMatrix4fv(handle[MAT], 1, false, Mat.multiply(GLM.vpMat, model).toArray(), 0);
 		gl.glUniform4fv(handle[SELECTED], 1, (Game.player.selected != null ? new Vec(Game.player.selected.pos).toArray() : new float[]{0,-5,0,0}), 0);
-		gl.glUniform1i(handle[TICK], Game.time % 1000);
+		gl.glUniform1i(handle[TICK], Game.time % 2000);
 	}
 
 	public void draw()
@@ -67,51 +63,48 @@ public class Block
 		double delta = (Math.toDegrees(Math.atan2(pos.x + 0.5 - Game.player.pos.x, pos.z + 0.5 - Game.player.pos.z)) - Game.player.rot.y + 520) % 360;
 		if ((delta > 180 ? 360 - delta : delta) > 180 - (dist / GLM.renderDistance) * 150)
 			return;
-		int count = 0;
-		for (; count < 6; count++)
-			if (!(pos.y == 0 && count == 5) && Game.map.getBlock(pos, count) == null)
-				break;
-		if (count == 6)
-			return;
-
-		if (!initialised)
-			init();
 
 		gl.glUniform4fv(handle[POS], 1, new Vec(pos).toArray(), 0);
 		gl.glUniform1i(handle[TYPE], type);
+		gl.glUniform1f(handle[HEAT], heat);
 		GLM.useVBO(Shader.matHandle, handle[MATERIAL], 4, type*Shader.matStride);
 
 		gl.glDrawElements(GLES30.GL_TRIANGLES, 36, GLES30.GL_UNSIGNED_BYTE, 0);
 	}
 	public void update()
 	{
-		if (!needsUpdate())
-			return;
-		lastUpdate = Game.time;
-		if (conducts() && !isSource())
+		if (type == Type.genSol || type == Type.genSolPow)
+			setPower(hasSkyAccess());
+		if (type == Type.drillPow)
+			heat += 15.0f;
+			
+		if (heat >= 5.0f)
 		{
-			if (!hasPower(source))
+			if (heat >= 100.0f)
 			{
-				setPower(false);
-				source = findSource();
+				Game.map.remove(this);
+				return;
 			}
-			setPower(hasPower(source));
+			float newHeat = heat, fanFactor = (type == Type.fanPow ? 4.0f : 1.0f);
+			for (Block b : neighbours)
+			{
+				if (b == null)
+					newHeat -= heat * 0.04f * fanFactor;
+				else
+				{
+					float delta = heat * 0.01f * fanFactor * (b.type == Type.fanPow ? 4.0f : 1.0f);
+					b.heat += delta;
+					newHeat -= delta;
+				}
+			}
+			heat = Math.max(newHeat, 0.0f);
 		}
-	}
-	Block findSource()
-	{
-		Block b, ret;
-		for (int i=0; i < 6; i++)
+		
+		if (hasBlockUpdate)
 		{
-			ret = b = Game.map.getBlock(pos, i);
-			if (b == null || !b.hasPower())
-				continue;
-			while (b.source != this && hasPower(b.source))
-				b = b.source;
-			if (b.isSource())
-				return ret;
+			
+			hasBlockUpdate = false;
 		}
-		return null;
 	}
 	void setPower(boolean pow)
 	{
@@ -123,38 +116,52 @@ public class Block
 			type = Type.fanPow;
 		else if (type == Type.fanPow && !pow)
 			type = Type.fan;
+		else if (type == Type.drill && pow && pos.y == 0)
+			type = Type.drillPow;
+		else if (type == Type.drillPow && !pow)
+			type = Type.drill;
+		else if (type == Type.genSol && pow)
+			type = Type.genSolPow;
+		else if (type == Type.genSolPow && !pow)
+			type = Type.genSol;
 		else
 			return;
 		Game.addUpdates(pos);
 	}
-	final static int[] conductors = { Type.cable, Type.cablePow, Type.stone, Type.fan, Type.fanPow };
-	final static int[] powerSources = { Type.stone };
-	boolean needsUpdate()
+	public boolean hasPower()
 	{
-		return (type == Type.cable || type == Type.cablePow || type == Type.fan || type == Type.fanPow)
-			&& lastUpdate != Game.time;
+		return Type.hasPower[type];
 	}
-	boolean hasPower()
+	public boolean isSource()
 	{
-		return (type == Type.cablePow || type == Type.fanPow)
-			|| Utils.contains(powerSources, type);
+		return Type.category[type] == Type.SOURCE;
 	}
-	boolean isSource()
+	public boolean isMachine()
 	{
-		return Utils.contains(powerSources, type);
+		return Type.category[type] == Type.MACHINE;
 	}
-	boolean conducts()
+	public boolean conducts()
 	{
-		return Utils.contains(conductors, type);
+		return Type.conducts[type];
 	}
-	boolean exists()
+	public boolean exists()
 	{
 		return Game.map.getBlock(pos) == this;
 	}
-	static boolean hasPower(Block b)
+	public static boolean hasPower(Block b)
 	{
 		return b != null && b.hasPower() && b.exists();
 	}
+	public boolean hasSkyAccess()
+	{
+		Chunk c = Game.map.getChunk(pos);
+		int x = pos.x - c.pos.x, z = pos.z - c.pos.z;
+		for (int y = pos.y + 1; y < 8; y++)
+			if (c.chunk[x][y][z] != null)
+				return false;
+		return true;
+	}
+	
 	@Override
 	public boolean equals(Object obj)
 	{

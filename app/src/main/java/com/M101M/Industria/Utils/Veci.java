@@ -31,8 +31,21 @@ public class Veci
 		case 3: return this.add(-1,0,0);
 		case 4: return this.add(0,-1,0);
 		case 5: return this.add(0,1,0);
+		default: return this;
 		}
-		return this;
+	}
+	public static int opposite(int dir)
+	{
+		switch(dir)
+		{
+			case 0: return 2;
+			case 1: return 3;
+			case 2: return 0;
+			case 3: return 1;
+			case 4: return 5;
+			case 5: return 6;
+			default: return dir;
+		}
 	}
 	public float length()
 	{ return (float)Math.sqrt(x*x + y*y + z*z); }

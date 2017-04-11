@@ -11,7 +11,7 @@ public class Game
 	public static Player player;
 	public static Plane ground;
 	public static UI ui;
-	public static Arr<Veci> updates;
+	private static Arr<Veci> updates;
 
 	public static void init()
 	{
@@ -19,8 +19,8 @@ public class Game
 		Shader.init();
 		map = new Map();
 		player = new Player();
-		updates = new Arr<Veci>();
 		ui = new UI();
+		updates = new Arr<Veci>();
 		Block.globalInit();
 		Plane.globalInit();
 		Rectangle.globalInit();
@@ -35,7 +35,7 @@ public class Game
 			map.set(new Block(0,i,0, Type.grass), false);
 		for (int i=1; i<10; i++)
 			map.set(new Block(0,0,i, Type.stone), false);
-		for (int i=0; i<7; i++)
+		for (int i=0; i<Type.count; i++)
 			for (int j=0; j<10; j++)
 				map.set(new Block(-i,0,-j, i), false);
 		
@@ -55,18 +55,20 @@ public class Game
 	}
 	public static void update()
 	{
-		Arr<Veci> old = updates;
-		updates = new Arr<Veci>(old.max);
-		for (Veci v : old)
+		for (Veci pos : updates)
 		{
-			Block b = map.getBlock(v);
-			if (b != null)
-				b.update();
+			for (int i=0; i<=6; i++)
+			{
+				Block b = map.getBlock(pos, i);
+				if (b != null)
+					b.hasBlockUpdate = true;
+			}
 		}
+		updates = new Arr<Veci>();
+		map.update();
 	}
 	public static void addUpdates(Veci pos)
 	{
-		for (int i=0; i<=6; i++)
-			updates.add(Veci.move(pos, i));
+		updates.add(pos);
 	}
 }

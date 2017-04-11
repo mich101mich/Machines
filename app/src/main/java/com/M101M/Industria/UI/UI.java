@@ -46,8 +46,10 @@ public class UI
 			"select Blocks");
 				
 		blocks.visible = false;
-		for (int type : Type.placeable)
+		for (int type = 0; type < Type.count; type++)
 		{
+			if (!Type.placeable[type])
+				continue;
 			Button b = new Button(
 				new Vec2(0,0),
 				new Vec2(0.3f,0.3f),
