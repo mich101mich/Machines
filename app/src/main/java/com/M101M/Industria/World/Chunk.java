@@ -7,7 +7,7 @@ import com.M101M.Industria.Utils.*;
 public class Chunk
 {
 	Veci pos;
-	Arr<Block> blocks = new Arr<Block>(30);
+	Pile<Block> blocks = new Pile<Block>(30);
 	Block[][][] chunk = new Block[8][8][8];
 	public Chunk(Veci position)
 	{

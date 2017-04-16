@@ -11,7 +11,7 @@ public class Game
 	public static Player player;
 	public static Plane ground;
 	public static UI ui;
-	private static Arr<Veci> updates;
+	private static Pile<Veci> updates;
 
 	public static void init()
 	{
@@ -20,7 +20,7 @@ public class Game
 		map = new Map();
 		player = new Player();
 		ui = new UI();
-		updates = new Arr<Veci>();
+		updates = new Pile<Veci>();
 		Block.globalInit();
 		Plane.globalInit();
 		Rectangle.globalInit();
@@ -64,7 +64,7 @@ public class Game
 					b.hasBlockUpdate = true;
 			}
 		}
-		updates = new Arr<Veci>();
+		updates = new Pile<Veci>();
 		map.update();
 	}
 	public static void addUpdates(Veci pos)

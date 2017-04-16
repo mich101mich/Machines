@@ -1,10 +1,11 @@
 package com.M101M.Industria.UI;
 
 import com.M101M.Industria.Utils.*;
+import java.util.*;
 
 public class Container extends Rectangle
 {
-	private Arr<UIElement> children;
+	private ArrayList<UIElement> children;
 	private Vec2 anchor;
 	private final Align align;
 	private float scrollOffset, totalSize;
@@ -13,7 +14,7 @@ public class Container extends Rectangle
 	{
 		super(pos, size, 0xaaaaaa);
 		this.align = align;
-		children = new Arr<UIElement>(50);
+		children = new ArrayList<UIElement>(50);
 		anchor = new Vec2(pos);
 
 		if (isHorizontal())

@@ -6,9 +6,9 @@ import java.util.*;
 
 public class Map
 {
-	private Arr<Chunk> chunks = new Arr<Chunk>(500);
+	private Pile<Chunk> chunks = new Pile<Chunk>(500);
 	private Hashtable<Veci, Chunk> map = new Hashtable<Veci, Chunk>(500);
-	private Arr<Grid> grids = new Arr<Grid>();
+	private Pile<Grid> grids = new Pile<Grid>();
 	Chunk getChunk(Veci pos)
 	{
 		pos = Chunk.toChunkVec(pos);

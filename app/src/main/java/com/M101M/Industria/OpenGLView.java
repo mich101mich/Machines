@@ -57,7 +57,7 @@ public class OpenGLView extends GLSurfaceView
 	}
 
 	MotionEvent event;
-	Arr<TouchEvent> touch = new Arr<TouchEvent>(20);
+	Pile<TouchEvent> touch = new Pile<TouchEvent>(20);
 	@Override public boolean onTouchEvent(MotionEvent e)
 	{
 		if (e.getAction() == e.ACTION_CANCEL)
@@ -89,9 +89,8 @@ public class OpenGLView extends GLSurfaceView
 				&& e.getActionIndex() == i))
 				continue;
 			final int id = e.getPointerId(i);
-			if (touch.find(new Arr.Condition<TouchEvent>(){public boolean test(TouchEvent e)
-						{
-							return e.id() == id; }})
+			if (touch.find(new Pile.Condition<TouchEvent>(){public boolean test(TouchEvent e) {
+					return e.id() == id; }})
 				== null)
 				touch.add(new TouchEvent(e, i, GLM.screen, GLM.ratio));
 		}
@@ -113,7 +112,7 @@ public class OpenGLView extends GLSurfaceView
 
 		Game.update();
 
-		TouchEvent t = touch.find(new Arr.Condition<TouchEvent>() {public
+		TouchEvent t = touch.find(new Pile.Condition<TouchEvent>() {public
 				boolean test(TouchEvent e) {
 					return !e.handled;
 				}});
