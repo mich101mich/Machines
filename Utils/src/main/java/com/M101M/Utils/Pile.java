@@ -1,5 +1,6 @@
-package com.M101M.Industria.Utils;
-import java.util.*;
+package com.M101M.Utils;
+import java.util.AbstractList;
+import java.util.Collection;
 
 public class Pile<E extends Object> extends AbstractList<E>
 {

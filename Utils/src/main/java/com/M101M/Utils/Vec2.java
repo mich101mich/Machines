@@ -1,4 +1,4 @@
-package com.M101M.Industria.Utils;
+package com.M101M.Utils;
 
 public class Vec2
 {

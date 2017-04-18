@@ -3,7 +3,7 @@ package com.M101M.Industria.World;
 import android.opengl.*;
 import com.M101M.Industria.*;
 import com.M101M.Industria.GLHelp.*;
-import com.M101M.Industria.Utils.*;
+import com.M101M.Utils.*;
 
 public class Plane
 {

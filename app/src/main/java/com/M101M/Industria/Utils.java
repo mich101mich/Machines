@@ -1,8 +1,7 @@
-package com.M101M.Industria.Utils;
+package com.M101M.Industria;
 
-import android.opengl.*;
-import com.M101M.Industria.*;
 import com.M101M.Industria.World.*;
+import com.M101M.Utils.*;
 import java.nio.*;
 
 public class Utils

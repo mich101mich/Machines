@@ -1,6 +1,6 @@
 package com.M101M.Industria.UI;
 
-import com.M101M.Industria.Utils.*;
+import com.M101M.Utils.*;
 import java.util.*;
 
 public class Container extends Rectangle

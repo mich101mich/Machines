@@ -1,8 +1,8 @@
 package com.M101M.Industria;
 import com.M101M.Industria.GLHelp.*;
 import com.M101M.Industria.UI.*;
-import com.M101M.Industria.Utils.*;
 import com.M101M.Industria.World.*;
+import com.M101M.Utils.*;
 
 public class Game
 {

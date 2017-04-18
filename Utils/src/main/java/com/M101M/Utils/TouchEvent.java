@@ -1,19 +1,19 @@
-package com.M101M.Industria.Utils;
+package com.M101M.Utils;
 
-import android.view.*;
+import android.view.MotionEvent;
 
 public class TouchEvent
 {
 	private int type;
-	private int id;
+	private final int id;
 	private Vec2 pos;
 	public boolean handled;
-	public TouchEvent(MotionEvent e, int index, Vec2 screenSize, float screenRatio)
+	TouchEvent(MotionEvent e, int index, Vec2 screenSize, float screenRatio)
 	{
 		id = e.getPointerId(index);
 		refresh(e, screenSize, screenRatio);
 	}
-	public boolean refresh(MotionEvent e, Vec2 screenSize, float screenRatio)
+	boolean refresh(MotionEvent e, Vec2 screenSize, float screenRatio)
 	{
 		handled = false;
 		if (e == null)

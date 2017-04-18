@@ -1,4 +1,4 @@
-package com.M101M.Industria.Utils;
+package com.M101M.Utils;
 
 public class Veci
 {
@@ -43,7 +43,7 @@ public class Veci
 			case 2: return 0;
 			case 3: return 1;
 			case 4: return 5;
-			case 5: return 6;
+			case 5: return 4;
 			default: return dir;
 		}
 	}

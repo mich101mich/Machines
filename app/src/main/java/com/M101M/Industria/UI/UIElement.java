@@ -1,7 +1,7 @@
 package com.M101M.Industria.UI;
 
 import android.graphics.*;
-import com.M101M.Industria.Utils.*;
+import com.M101M.Utils.*;
 
 public abstract class UIElement
 {

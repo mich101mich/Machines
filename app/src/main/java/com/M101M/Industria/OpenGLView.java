@@ -5,8 +5,8 @@ import android.opengl.*;
 import android.view.*;
 import com.M101M.Industria.GLHelp.*;
 import com.M101M.Industria.UI.*;
-import com.M101M.Industria.Utils.*;
 import com.M101M.Industria.World.*;
+import com.M101M.Utils.*;
 import java.util.*;
 
 public class OpenGLView extends GLSurfaceView
@@ -55,64 +55,25 @@ public class OpenGLView extends GLSurfaceView
 		}
 		display(message);
 	}
-
-	MotionEvent event;
-	Pile<TouchEvent> touch = new Pile<TouchEvent>(20);
-	@Override public boolean onTouchEvent(MotionEvent e)
+	
+	TouchHandler touch = new TouchHandler();
+	
+	@Override
+	public boolean onTouchEvent(MotionEvent e)
 	{
-		if (e.getAction() == e.ACTION_CANCEL)
-			event = null;
-		else
-			event = e;
-		return true;
-	}
-	void handleTouch()
-	{
-		if (event == null)
-		{
-			Iterator<TouchEvent> it = touch.iterator();
-			while (it.hasNext())
-			{
-				if (!it.next().refresh(null, GLM.screen, GLM.ratio))
-					it.remove();
-			}
-			return;
-		}
-		MotionEvent e = event;
-		event = null;
-		for (TouchEvent t : touch)
-			t.handled = true;
-		for (int i=0; i < e.getPointerCount(); i++)
-		{
-			if (e.getAction() == e.ACTION_UP ||
-				(e.getActionMasked() == e.ACTION_POINTER_UP
-				&& e.getActionIndex() == i))
-				continue;
-			final int id = e.getPointerId(i);
-			if (touch.find(new Pile.Condition<TouchEvent>(){public boolean test(TouchEvent e) {
-					return e.id() == id; }})
-				== null)
-				touch.add(new TouchEvent(e, i, GLM.screen, GLM.ratio));
-		}
-		Iterator<TouchEvent> it = touch.iterator();
-		while (it.hasNext())
-		{
-			TouchEvent t = it.next();
-			if (t.handled && !t.refresh(e, GLM.screen, GLM.ratio))
-				it.remove();
-		}
+		return touch.onTouchEvent(e);
 	}
 
 	void PhysicUpdate()
 	{
-		handleTouch();
+		touch.processTouchEvents(GLM.screen, GLM.ratio);
 
-		for (TouchEvent t : touch)
+		for (TouchEvent t : touch.touchEvents)
 			Game.ui.onTouch(t);
 
 		Game.update();
 
-		TouchEvent t = touch.find(new Pile.Condition<TouchEvent>() {public
+		TouchEvent t = touch.touchEvents.find(new Pile.Condition<TouchEvent>() {public
 				boolean test(TouchEvent e) {
 					return !e.handled;
 				}});
@@ -156,7 +117,9 @@ public class OpenGLView extends GLSurfaceView
 		public void onSurfaceCreated(javax.microedition.khronos.opengles.GL10 unused, javax.microedition.khronos.egl.EGLConfig config)
 		{
 			try
-			{ GLM.setup(); }
+			{
+				GLM.setup();
+			}
 			catch (Exception e)
 			{ showError(e, "onSurfaceCreated"); }
 		}
@@ -190,7 +153,9 @@ public class OpenGLView extends GLSurfaceView
 		public void onSurfaceChanged(javax.microedition.khronos.opengles.GL10 unused, int width, int height)
 		{
 			try
-			{ GLM.changeSurface(width, height); }
+			{
+				GLM.changeSurface(width, height);
+			}
 			catch (Exception e)
 			{ showError(e, "onSurfaceChanged"); }
 		}

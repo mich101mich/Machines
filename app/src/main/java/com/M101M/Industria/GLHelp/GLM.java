@@ -2,7 +2,7 @@ package com.M101M.Industria.GLHelp;
 
 import android.opengl.*;
 import com.M101M.Industria.*;
-import com.M101M.Industria.Utils.*;
+import com.M101M.Utils.*;
 
 public class GLM
 {

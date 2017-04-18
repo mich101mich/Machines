@@ -1,4 +1,4 @@
-package com.M101M.Industria.Utils;
+package com.M101M.Utils;
 
 import android.opengl.Matrix;
 
