@@ -36,20 +36,18 @@ public class Block
 
 		System.arraycopy(GLM.genBuffers(2), 0, handle, BUFFER, 2);
 		GLM.vbo(handle[BUFFER], new float[]{0,0,0, 0,0,1, 0,1,0, 1,0,0, 0,1,1, 1,0,1, 1,1,0, 1,1,1});
-
-		gl.glBindBuffer(GLES30.GL_ELEMENT_ARRAY_BUFFER, handle[INDEX]);
-		gl.glBufferData(GLES30.GL_ELEMENT_ARRAY_BUFFER, 36, Utils.toByteBuffer(new byte[]{1,5,4,4,5,7, 5,3,7,7,3,6, 3,0,6,6,0,2, 0,1,2,2,1,4, 0,3,1,1,3,5, 4,7,2,2,7,6}), GLES30.GL_STATIC_DRAW);
+		GLM.vbo(handle[INDEX], new byte[]{1,5,4,4,5,7, 5,3,7,7,3,6, 3,0,6,6,0,2, 0,1,2,2,1,4, 0,3,1,1,3,5, 4,7,2,2,7,6});
 	}
 
 	public static void startDrawing()
 	{
 		Shader.use(Shader.BLOCK);
-		gl.glBindBuffer(GLES30.GL_ELEMENT_ARRAY_BUFFER, handle[INDEX]);
 		GLM.useVBO(handle[BUFFER], handle[VERTEX], 3, 0);
 		
 		Mat model = Mat.identity()
 			.rotate(Vec.negative(Game.player.rot))
 			.translate(Vec.negative(Game.player.pos));
+			
 		gl.glUniformMatrix4fv(handle[MAT], 1, false, Mat.multiply(GLM.vpMat, model).toArray(), 0);
 		gl.glUniform4fv(handle[SELECTED], 1, (Game.player.selected != null ? new Vec(Game.player.selected.pos).toArray() : new float[]{0,-5,0,0}), 0);
 		gl.glUniform1i(handle[TICK], Game.time % 2000);
@@ -69,7 +67,7 @@ public class Block
 		gl.glUniform1f(handle[HEAT], heat);
 		GLM.useVBO(Shader.matHandle, handle[MATERIAL], 4, type*Shader.matStride);
 
-		gl.glDrawElements(GLES30.GL_TRIANGLES, 36, GLES30.GL_UNSIGNED_BYTE, 0);
+		GLM.draw(GLES30.GL_TRIANGLES, 36, handle[INDEX]);
 	}
 	public void update()
 	{

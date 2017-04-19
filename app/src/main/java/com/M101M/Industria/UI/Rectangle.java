@@ -7,7 +7,6 @@ import com.M101M.Utils.*;
 public class Rectangle extends UIElement
 {
 	private static int matHandle, colHandle, vertexHandle, bufferHandle;
-	private static java.nio.ByteBuffer buffer;
 	int color;
 	public Rectangle(Vec2 pos, Vec2 size, int color)
 	{
@@ -24,8 +23,6 @@ public class Rectangle extends UIElement
 		
 		float[] corners = {0,1, 1,1, 0,0, 1,0};
 		GLM.vbo(bufferHandle, corners);
-		
-		buffer = Utils.toByteBuffer(new byte[]{ 0, 1, 2, 3 });
 	}
 	@Override
 	public void draw()
@@ -43,7 +40,7 @@ public class Rectangle extends UIElement
 		gl.glUniform4fv(colHandle, 1, Utils.hexToArray(color),0);
 		GLM.useVBO(bufferHandle, vertexHandle, 2, 0);
 		
-		gl.glDrawElements(GLES20.GL_TRIANGLE_STRIP, 4, GLES20.GL_UNSIGNED_BYTE, buffer);
+		GLM.draw(GLES20.GL_TRIANGLE_STRIP, 4);
 	}
 	@Override
 	public boolean handleTouch(TouchEvent e)

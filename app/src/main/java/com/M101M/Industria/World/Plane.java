@@ -8,8 +8,7 @@ import com.M101M.Utils.*;
 public class Plane
 {
 	Vec pos;
-	private static final int MAT=0, POS=1, VERTEX=2, BUFFER=3, INDEX=4;
-	private static final int[] handles = new int[5];
+	private static int matHandle, posHandle, vertexHandle, bufferHandle;
 	
 	public Plane (Vec position)
 	{
@@ -19,31 +18,27 @@ public class Plane
 	public static void globalInit ()
 	{
 		Shader.use(Shader.PLANE);
-		handles[MAT] = Shader.getUniform("mvpMat");
-		handles[POS] = Shader.getUniform("position");
-		handles[VERTEX] = Shader.getAttribute("vertex");
+		matHandle = Shader.getUniform("mvpMat");
+		posHandle = Shader.getUniform("position");
+		vertexHandle = Shader.getAttribute("vertex");
 
-		System.arraycopy(GLM.genBuffers(2),0, handles,BUFFER, 2);
-		GLM.vbo(handles[BUFFER], new float[]{-50,0,50, 50,0,50, -50,0,-50, 50,0,-50});
-		
-		gl.glBindBuffer(GLES20.GL_ELEMENT_ARRAY_BUFFER, handles[INDEX]);
-		gl.glBufferData(GLES20.GL_ELEMENT_ARRAY_BUFFER, 4, Utils.toByteBuffer(new byte[]{0,1,2,3}), GLES20.GL_STATIC_DRAW);
+		bufferHandle = GLM.genBuffers(1)[0];
+		GLM.vbo(bufferHandle, new float[]{-50,0,50, 50,0,50, -50,0,-50, 50,0,-50});
 	}
 
 	public static void startDrawing ()
 	{
 		Shader.use(Shader.PLANE);
-		gl.glBindBuffer(GLES20.GL_ELEMENT_ARRAY_BUFFER, handles[INDEX]);
-		GLM.useVBO(handles[BUFFER], handles[VERTEX], 3, 0);
+		GLM.useVBO(bufferHandle, vertexHandle, 3, 0);
 		
 		Mat model = Mat.identity()
 			.rotate(Vec.negative(Game.player.rot))
 			.translate(Vec.negative(Game.player.pos));
-		gl.glUniformMatrix4fv(handles[MAT], 1, false, Mat.multiply(GLM.vpMat, model).toArray(), 0);
+		gl.glUniformMatrix4fv(matHandle, 1, false, Mat.multiply(GLM.vpMat, model).toArray(), 0);
 	}
 	public void draw ()
 	{
-		gl.glUniform4fv(handles[POS], 1, new float[]{Game.player.pos.x + pos.x, pos.y, Game.player.pos.z + pos.z, 0}, 0);
-		gl.glDrawElements(GLES20.GL_TRIANGLE_STRIP, 4, GLES20.GL_UNSIGNED_BYTE, 0);
+		gl.glUniform4fv(posHandle, 1, new float[]{Game.player.pos.x + pos.x, pos.y, Game.player.pos.z + pos.z, 0}, 0);
+		GLM.draw(GLES20.GL_TRIANGLE_STRIP, 4);
 	}
 }

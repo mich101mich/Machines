@@ -37,6 +37,11 @@ public class Shader
 			GLM.loadShader(GLES20.GL_VERTEX_SHADER, textVert),
 			GLM.loadShader(GLES20.GL_FRAGMENT_SHADER, textFrag)
 		);
+		
+		programs[CIRCLE] = GLM.createProgram(
+			GLM.loadShader(GLES20.GL_VERTEX_SHADER, circleVert),
+			GLM.loadShader(GLES20.GL_FRAGMENT_SHADER, circleFrag)
+		);
 	}
 	public static void use(int type)
 	{
@@ -54,7 +59,7 @@ public class Shader
 		return ret;
 	}
 	
-	public static final int BLOCK=0, PLANE=1, SHAPE=2, TEXT=3;
+	public static final int BLOCK=0, PLANE=1, SHAPE=2, TEXT=3, CIRCLE=4;
 	private static int programs[], program;
 	private static final String[] blockVert = {
 		"uniform mat4 mvpMat;",
@@ -173,6 +178,23 @@ public class Shader
 		"		else",
 		"				gl_FragColor = vec4(0,0,0,0);",
 		"}"
+	}, circleVert = {
+	"uniform mat4 mvpMat;",
+	"attribute vec4 vertex;",
+	"varying vec2 pos;",
+	"void main() {",
+	"		gl_Position = mvpMat * vertex;",
+	"		pos = vertex.xy;",
+	"}"
+	}, circleFrag = {
+	"uniform vec4 color;",
+	"varying vec2 pos;",
+	"void main() {",
+	"		if (pos.x * pos.x + pos.y * pos.y <= 1.0)",
+	"				gl_FragColor = color;",
+	"		else",
+	"				gl_FragColor = vec4(0,0,0,0);",
+	"}"
 	};
 
 	public static int matHandle, matStride=32 * 4;

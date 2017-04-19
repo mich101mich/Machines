@@ -7,9 +7,11 @@ import com.M101M.Utils.*;
 public class GLM
 {
 	public static Mat vpMat, uiMat;
-	public static int buffers[] = new int[64], bufferCount = 0, renderDistance = 30;
+	public static final int renderDistance = 30;
 	public static Vec2 screen;
 	public static float ratio;
+	private static int buffers[] = new int[64], bufferCount = 0, indexBufferHandle;
+	
 	public static int loadShader(int type, String... lines)
 	{
 		String code = Utils.join(lines, "\n");
@@ -26,6 +28,12 @@ public class GLM
 		gl.glLinkProgram(program);
 		return program;
 	}
+	public static void vbo(int handle, byte[] values)
+	{
+		gl.glBindBuffer(GLES30.GL_ELEMENT_ARRAY_BUFFER, handle);
+		gl.glBufferData(GLES30.GL_ELEMENT_ARRAY_BUFFER, values.length, Utils.toByteBuffer(values), GLES30.GL_STATIC_DRAW);
+		gl.glBindBuffer(GLES30.GL_ELEMENT_ARRAY_BUFFER, 0);
+	}
 	public static void vbo(int handle, float[] values)
 	{
 		gl.glBindBuffer(GLES30.GL_ARRAY_BUFFER, handle);
@@ -38,6 +46,16 @@ public class GLM
 		gl.glVertexAttribPointer(vertexHandle, floatsPerVertex, GLES30.GL_FLOAT, false, 0, offset);
 		gl.glBindBuffer(GLES30.GL_ARRAY_BUFFER, 0);
 	}
+	public static void draw(int type, int count, int bufferHandle)
+	{
+		gl.glBindBuffer(GLES30.GL_ELEMENT_ARRAY_BUFFER, bufferHandle);
+		gl.glDrawElements(type, count, GLES30.GL_UNSIGNED_BYTE, 0);
+		gl.glBindBuffer(GLES30.GL_ELEMENT_ARRAY_BUFFER, 0);
+	}
+	public static void draw(int type, int count)
+	{
+		draw(type, count, indexBufferHandle);
+	}
 	public static void setup()
 	{
 		buffers = new int[64]; bufferCount = 0;
@@ -47,6 +65,11 @@ public class GLM
 		gl.glCullFace(GLES20.GL_BACK);
 		gl.glEnable(GLES20.GL_BLEND);
 		gl.glBlendFunc(GLES20.GL_ONE, GLES20.GL_ONE_MINUS_SRC_ALPHA);
+		indexBufferHandle = genBuffers(1)[0];
+		byte[] indices = new byte[255];
+		for (int i = 0; i < 255; i++)
+			indices[i] = (byte)i;
+		vbo(indexBufferHandle, indices);
 	}
 	public static void changeSurface(int w, int h)
 	{

@@ -7,8 +7,6 @@ import com.M101M.Utils.*;
 public class Circle extends UIElement
 {
 	private static int matHandle, colHandle, vertexHandle, bufferHandle;
-	private static java.nio.ByteBuffer buffer;
-	private static final int accuracy = 30;
 	public int color;
 	public Circle(Vec2 pos, Vec2 size, int color)
 	{
@@ -21,25 +19,14 @@ public class Circle extends UIElement
 	}
 	public static void globalInit()
 	{
-		Shader.use(Shader.SHAPE);
+		Shader.use(Shader.CIRCLE);
 		matHandle = Shader.getUniform("mvpMat");
 		colHandle = Shader.getUniform("color");
 		vertexHandle = Shader.getAttribute("vertex");
 		bufferHandle = GLM.genBuffers(1)[0];
 
-		float[] corners = new float[accuracy * 2 + 2];
-		for (int i = 0; i < accuracy; i++)
-		{
-			corners[2*i + 2] = (float)-Math.sin(2.0 * Math.PI / accuracy * i);
-			corners[2*i + 3] = (float)-Math.cos(2.0 * Math.PI / accuracy * i);
-		}
-		GLM.vbo(bufferHandle, corners);
 		
-		byte[] indices = new byte[accuracy + 2];
-		for (byte i = 0; i < accuracy + 1; i++)
-			indices[i] = i;
-		indices[accuracy + 1] = 1;
-		buffer = Utils.toByteBuffer(indices);
+		GLM.vbo(bufferHandle, new float[]{ -1,-1, -1,1, 1,-1, 1,1 });
 	}
 	@Override
 	public void draw()
@@ -47,7 +34,7 @@ public class Circle extends UIElement
 		if (!visible || Utils.hexToArray(color)[3] < 0.01)
 			return;
 
-		Shader.use(Shader.SHAPE);
+		Shader.use(Shader.CIRCLE);
 
 		Mat model = Mat.identity()
 			.translate(pos.x, pos.y,0)
@@ -57,7 +44,7 @@ public class Circle extends UIElement
 		gl.glUniform4fv(colHandle, 1, Utils.hexToArray(color),0);
 		GLM.useVBO(bufferHandle, vertexHandle, 2, 0);
 		
-		gl.glDrawElements(GLES20.GL_TRIANGLE_FAN, accuracy + 2, GLES20.GL_UNSIGNED_BYTE, buffer);
+		GLM.draw(GLES20.GL_TRIANGLE_STRIP, 4);
 	}
 	@Override
 	public boolean handleTouch(TouchEvent e)

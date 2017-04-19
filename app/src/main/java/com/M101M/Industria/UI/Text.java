@@ -85,7 +85,7 @@ public class Text extends Rectangle
 						pos.x + lw*(x+1), pos.y + lh*y + scale,
 						pos.x + lw*(x+1),  pos.y + lh*(y+1) + scale }));
 
-			gl.glDrawElements(GLES20.GL_TRIANGLE_STRIP, 4, GLES20.GL_UNSIGNED_BYTE, Utils.toByteBuffer(new byte[]{ 0, 1, 2, 3 }));
+			GLM.draw(GLES20.GL_TRIANGLE_STRIP, 4);
 		}
 	}
 
