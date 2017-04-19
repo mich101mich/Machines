@@ -79,5 +79,5 @@ public class Vec
 	public static boolean equals(Vec l,Veci r)
 	{ return equals(l, new Vec(r)); }
 	@Override public String toString()
-	{ return "("+x+", "+y+", "+z+")"; }
+	{ return String.format("(%7.2f,%7.2f,%7.2f)", x, y, z); }
 }

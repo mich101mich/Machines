@@ -73,17 +73,15 @@ public class Grid
 	public static Grid inflate(Grid g, Block origin)
 	{
 		Grid ret = g;
+		if (origin == null || origin.grid != null || !origin.conducts())
+			return null;
 		
-		Stack<Veci> check = new Stack<Veci>();
-		check.push(origin.pos);
+		Stack<Block> check = new Stack<Block>();
+		check.push(origin);
 		while (!check.isEmpty())
 		{
-			Veci p = check.pop();
-			Chunk c = Game.map.getChunk(p);
-			if (c == null)
-				continue;
-			Block b = c.getBlock(p);
-			if (b == null || !b.conducts() || b.grid == g)
+			Block b = check.pop();
+			if (b.grid == g)
 				continue;
 			if (b.grid != null)
 			{
@@ -94,8 +92,9 @@ public class Grid
 				continue;
 			}
 			if (g.add(b))
-				for (int i = 0; i < 6; i++)
-					check.add(Veci.move(p, i));
+				for (Block n : b.neighbours)
+					if (n != null && n.conducts())
+						check.add(n);
 		}
 		g.update();
 		return ret;

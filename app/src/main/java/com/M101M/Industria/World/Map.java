@@ -29,38 +29,35 @@ public class Map
 			chunks.add(chunk);
 			map.put(chunk.getPos(), chunk);
 		}
-		if (chunk.set(b))
+		if (!chunk.set(b))
+			return false;
+		for (int i = 0; i < 6; i++)
 		{
-			for (int i = 0; i < 6; i++)
-			{
-				Block block = getBlock(b.pos, i);
-				if (block != null)
-					block.neighbours[Veci.opposite(i)] = b;
-				b.neighbours[i] = block;
-			}
-			if (sendUpdates)
-			{
-				Game.addUpdates(b.pos);
-				addGrid(b);
-			}
-			return true;
+			Block block = getBlock(b.pos, i);
+			if (block != null)
+				block.neighbours[Veci.opposite(i)] = b;
+			b.neighbours[i] = block;
 		}
-		return false;
+		if (sendUpdates)
+		{
+			Game.addUpdates(b.pos);
+			addGrid(b);
+		}
+		return true;
 	}
 	public void remove(Block b)
 	{
 		if (b == null)
 			return;
 		Chunk chunk = getChunk(b.pos);
-		if (chunk != null && chunk.remove(b))
-		{
-			for (int i = 0; i < 6; i++)
-				if (b.neighbours[i] != null)
-					b.neighbours[i].neighbours[Veci.opposite(i)] = null;
-			Game.addUpdates(b.pos);
-			if (b.grid != null)
-				removeGrid(b);
-		}
+		if (chunk == null || !chunk.remove(b))
+			return;
+		for (int i = 0; i < 6; i++)
+			if (b.neighbours[i] != null)
+				b.neighbours[i].neighbours[Veci.opposite(i)] = null;
+		Game.addUpdates(b.pos);
+		if (b.grid != null)
+			removeGrid(b);
 	}
 	public Block remove(Veci pos)
 	{
@@ -68,15 +65,14 @@ public class Map
 		if (chunk == null)
 			return null;
 		Block ret = chunk.remove(pos);
-		if (ret != null)
-		{
-			for (int i = 0; i < 6; i++)
-				if (ret.neighbours[i] != null)
-					ret.neighbours[i].neighbours[Veci.opposite(i)] = null;
-			Game.addUpdates(pos);
-			if (ret.grid != null)
-				removeGrid(ret);
-		}
+		if (ret == null)
+			return null;
+		for (int i = 0; i < 6; i++)
+			if (ret.neighbours[i] != null)
+				ret.neighbours[i].neighbours[Veci.opposite(i)] = null;
+		Game.addUpdates(pos);
+		if (ret.grid != null)
+			removeGrid(ret);
 		return ret;
 	}
 	public Block getBlock(Veci pos, int dir)
@@ -149,7 +145,8 @@ public class Map
 				block.setPower(false);
 		}
 		for (Block source : g.sources)
-			addGrid(source);
+			if (source.grid == null)
+				addGrid(source);
 	}
 	public void draw()
 	{
@@ -160,7 +157,15 @@ public class Map
 	{
 		for (Chunk c : chunks)
 			c.update();
-		for (Grid g : grids)
-			g.update();
+		
+		Iterator<Grid> it = grids.iterator();
+		while(it.hasNext())
+		{
+			Grid g = it.next();
+			if (g.blocks.size() == 0)
+				it.remove();
+			else
+				g.update();
+		}
 	}
 }
